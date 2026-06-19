@@ -250,7 +250,7 @@ tr:hover td{background:var(--surf2)}
   <button class="nav-tab active" id="tab-grade" onclick="setPage('grade')"><i class="ti ti-calendar-week" aria-hidden="true"></i>Grade</button>
   <button class="nav-tab" id="tab-sponsors" onclick="setPage('sponsors')"><i class="ti ti-building-store" aria-hidden="true"></i>Patrocinadores</button>
   <button class="nav-tab" id="tab-trends" onclick="setPage('trends')"><i class="ti ti-chart-line" aria-hidden="true"></i>Tendências</button>
-  <button class="nav-tab" id="tab-import" onclick="setPage('import')"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i>Importar Excel</button>
+  <button class="nav-tab" id="tab-export" onclick="setPage('export')"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i>Exportar Excel</button>
   <div class="nav-end">
     <div class="date-badge"><i class="ti ti-calendar" aria-hidden="true"></i><span id="todayLabel"></span></div>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Alternar modo claro/escuro"><i class="ti ti-moon" id="themeIcon" aria-hidden="true"></i></button>
@@ -409,35 +409,37 @@ tr:hover td{background:var(--surf2)}
   </div>
 </div>
 
-<!-- IMPORT PAGE -->
-<div class="page" id="page-import">
+<!-- EXPORT PAGE -->
+<div class="page" id="page-export">
   <div class="hero" style="padding-bottom:1.5rem">
-    <div class="hero-eye">Importação · Excel</div>
-    <div class="hero-title">Atualizar grade via planilha</div>
-    <div class="hero-sub">Importe um arquivo .xlsx para substituir toda a grade de aulas</div>
+    <div class="hero-eye">Exportação · Excel</div>
+    <div class="hero-title">Exportar grade de aulas</div>
+    <div class="hero-sub">Baixe a grade completa ou filtrada em formato .xlsx</div>
   </div>
   <div class="wrap">
-    <div class="tbl-wrap" style="margin-bottom:1.25rem">
-      <div class="tbl-hd"><span class="tbl-title">Formato esperado da planilha</span></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:1.5rem">
+      <div style="background:var(--surf);border:.5px solid var(--bdr);border-radius:var(--rl);padding:1.25rem 1.1rem">
+        <div style="font-size:13px;font-weight:600;margin-bottom:.4rem;display:flex;align-items:center;gap:7px"><i class="ti ti-table-export" style="font-size:18px;color:var(--primary)" aria-hidden="true"></i>Grade completa</div>
+        <div style="font-size:11px;color:var(--txm);margin-bottom:1rem;line-height:1.6">Todas as aulas das 4 semanas com modalidade, horário, local, patrocínio e marca.</div>
+        <button class="btn primary" style="width:100%" onclick="exportExcel('all')"><i class="ti ti-download" style="margin-right:5px;font-size:13px" aria-hidden="true"></i>Baixar grade completa</button>
+      </div>
+      <div style="background:var(--surf);border:.5px solid var(--bdr);border-radius:var(--rl);padding:1.25rem 1.1rem">
+        <div style="font-size:13px;font-weight:600;margin-bottom:.4rem;display:flex;align-items:center;gap:7px"><i class="ti ti-circle-dotted" style="font-size:18px;color:var(--primary)" aria-hidden="true"></i>Apenas sem patrocínio</div>
+        <div style="font-size:11px;color:var(--txm);margin-bottom:1rem;line-height:1.6">Somente as aulas sem patrocínio — oportunidades disponíveis para marcas parceiras.</div>
+        <button class="btn primary" style="width:100%" onclick="exportExcel('open')"><i class="ti ti-download" style="margin-right:5px;font-size:13px" aria-hidden="true"></i>Baixar oportunidades</button>
+      </div>
+      <div style="background:var(--surf);border:.5px solid var(--bdr);border-radius:var(--rl);padding:1.25rem 1.1rem">
+        <div style="font-size:13px;font-weight:600;margin-bottom:.4rem;display:flex;align-items:center;gap:7px"><i class="ti ti-check" style="font-size:18px;color:var(--green)" aria-hidden="true"></i>Apenas patrocinadas</div>
+        <div style="font-size:11px;color:var(--txm);margin-bottom:1rem;line-height:1.6">Aulas com patrocínio direto ou via incentivo — visão consolidada de contratos ativos.</div>
+        <button class="btn primary" style="width:100%" onclick="exportExcel('sponsored')"><i class="ti ti-download" style="margin-right:5px;font-size:13px" aria-hidden="true"></i>Baixar patrocinadas</button>
+      </div>
+    </div>
+    <div style="background:var(--surf);border:.5px solid var(--bdr);border-radius:var(--rl);overflow:hidden">
+      <div class="tbl-hd"><span class="tbl-title">Pré-visualização da grade completa</span><span style="font-size:11px;color:var(--txf)" id="exportCount"></span></div>
       <div style="overflow-x:auto"><table style="table-layout:auto">
-        <thead><tr><th>semana</th><th>dia</th><th>horario</th><th>nome</th><th>modalidade</th><th>local</th><th>patrocinio</th><th>marca</th><th>publico</th></tr></thead>
-        <tbody>
-          <tr><td>1</td><td>Segunda</td><td>06:30</td><td>Yoga ao ar livre</td><td>yoga</td><td>Estação Ipanema Norte</td><td>direct</td><td>Eleiko</td><td>120</td></tr>
-          <tr><td>1</td><td>Terça</td><td>07:00</td><td>Pilates</td><td>pilates</td><td>Estação Ipanema Sul</td><td>incentive</td><td>Bradesco Saúde</td><td>65</td></tr>
-          <tr><td>2</td><td>Sexta</td><td>18:00</td><td>CrossFit</td><td>crossfit</td><td>Estação Leblon</td><td>open</td><td></td><td>110</td></tr>
-        </tbody>
+        <thead><tr><th>Semana</th><th>Dia</th><th>Data</th><th>Hora</th><th>Aula</th><th>Modalidade</th><th>Local</th><th>Patrocínio</th><th>Marca</th><th>Público</th></tr></thead>
+        <tbody id="exportPreviewBody"></tbody>
       </table></div>
-    </div>
-    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
-      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="handleFile(this.files[0])">
-      <i class="ti ti-file-spreadsheet" aria-hidden="true"></i>
-      <div class="upload-title">Clique ou arraste o arquivo aqui</div>
-      <div class="upload-sub">.xlsx, .xls ou .csv · A grade atual será substituída</div>
-    </div>
-    <div class="upload-result" id="uploadResult"></div>
-    <div id="previewSection" style="display:none">
-      <div class="section-hd"><div><div class="section-title">Pré-visualização</div><div class="section-sub" id="previewCount"></div></div><button class="btn primary" onclick="applyImport()"><i class="ti ti-check" style="margin-right:4px;font-size:12px" aria-hidden="true"></i>Confirmar importação</button></div>
-      <div class="tbl-wrap"><div style="overflow-x:auto"><table style="table-layout:auto"><thead><tr><th>Sem.</th><th>Dia</th><th>Hora</th><th>Aula</th><th>Modalidade</th><th>Local</th><th>Patrocínio</th><th>Marca</th><th>Público</th></tr></thead><tbody id="previewBody"></tbody></table></div></div>
     </div>
   </div>
 </div>
@@ -557,7 +559,7 @@ function seedData(){
 
 let classes=[],curWeek=0,catFilter='all',spFilter='all',editingId=null,charts={};
 let spWeekFilter='all',spTypeFilter='all';
-let pendingImport=[];
+
 
 async function loadClasses(){
   try{
@@ -581,6 +583,7 @@ function setPage(p){
   document.getElementById('tab-'+p).classList.add('active');
   if(p==='trends')rebuildCharts();
   if(p==='sponsors')renderSponsors();
+  if(p==='export')renderExportPreview();
 }
 
 /* ── WEEK TABS ── */
@@ -699,52 +702,55 @@ function updateAll(){updateKPIs();renderGrid();renderOppTable();}
 document.getElementById('catF').addEventListener('click',e=>{const b=e.target.closest('.fbtn');if(!b)return;catFilter=b.dataset.v;document.querySelectorAll('#catF .fbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderGrid();});
 document.getElementById('spF').addEventListener('click',e=>{const b=e.target.closest('.fbtn');if(!b)return;spFilter=b.dataset.v;document.querySelectorAll('#spF .fbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderGrid();});
 
-/* ── EXCEL IMPORT ── */
-const DAY_MAP={'segunda':0,'terca':1,'terça':1,'quarta':2,'quinta':3,'sexta':4,'sabado':5,'sábado':5,'domingo':6};
-function normalizeDay(s){return DAY_MAP[s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')]??0;}
+/* ── EXCEL EXPORT ── */
+const SP_LABEL_EXPORT={direct:'Patrocinada direta',incentive:'Via incentivo',open:'Sem patrocínio'};
 
-function handleDrop(e){e.preventDefault();document.getElementById('uploadZone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)handleFile(f);}
-function handleFile(file){
-  if(!file)return;
-  const res=document.getElementById('uploadResult');
-  const ext=file.name.split('.').pop().toLowerCase();
-  if(!['xlsx','xls','csv'].includes(ext)){res.className='upload-result err';res.innerHTML='<i class="ti ti-x"></i>Formato inválido. Use .xlsx, .xls ou .csv';return;}
-  const reader=new FileReader();
-  reader.onload=e=>{
-    try{
-      const wb=XLSX.read(e.target.result,{type:'array'});
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
-      if(!rows.length){res.className='upload-result err';res.innerHTML='<i class="ti ti-x"></i>Planilha vazia ou sem dados.';return;}
-      pendingImport=rows.map((r,i)=>({
-        id:`import-${Date.now()}-${i}`,
-        week:Math.max(0,Math.min(3,(parseInt(r.semana)||1)-1)),
-        day:normalizeDay(String(r.dia||'')),
-        time:String(r.horario||'07:00'),
-        name:String(r.nome||'Aula'),
-        cat:String(r.modalidade||'yoga').toLowerCase(),
-        local:String(r.local||'Estação Ipanema Norte'),
-        sp:['direct','incentive','open'].includes(String(r.patrocinio))? String(r.patrocinio):'open',
-        brand:String(r.marca||''),
-        aud:parseInt(r.publico)||80,
-      }));
-      res.className='upload-result ok';res.innerHTML=`<i class="ti ti-check"></i>${rows.length} aulas carregadas. Confirme abaixo para substituir a grade.`;
-      document.getElementById('previewSection').style.display='block';
-      document.getElementById('previewCount').textContent=pendingImport.length+' aulas na pré-visualização';
-      document.getElementById('previewBody').innerHTML=pendingImport.slice(0,30).map(r=>`<tr><td>${r.week+1}</td><td>${DAYFULL[r.day]}</td><td>${r.time}</td><td>${r.name}</td><td><span class="b-cat">${CATLABELS[r.cat]||r.cat}</span></td><td>${r.local}</td><td><span class="badge ${r.sp==='direct'?'b-dir':r.sp==='incentive'?'b-inc':'b-open'}">${SP_LABEL[r.sp]}</span></td><td>${r.brand}</td><td>${r.aud}</td></tr>`).join('')+(pendingImport.length>30?`<tr><td colspan="9" style="text-align:center;color:var(--txf)">… e mais ${pendingImport.length-30} aulas</td></tr>`:'');
-    }catch(err){res.className='upload-result err';res.innerHTML='<i class="ti ti-x"></i>Erro ao ler arquivo: '+err.message;}
-  };
-  reader.readAsArrayBuffer(file);
+function getExportRows(filter){
+  const BASE_DATE=new Date(2026,5,16);
+  return classes
+    .filter(c=>filter==='all'||(filter==='open'&&c.sp==='open')||(filter==='sponsored'&&c.sp!=='open'))
+    .sort((a,b)=>a.week-b.week||a.day-b.day||a.time.localeCompare(b.time))
+    .map(c=>{
+      const date=new Date(BASE_DATE);date.setDate(date.getDate()+c.week*7+c.day);
+      const dd=String(date.getDate()).padStart(2,'0');
+      const mm=String(date.getMonth()+1).padStart(2,'0');
+      return{
+        'Semana':'Semana '+(c.week+1),
+        'Dia':DAYFULL[c.day],
+        'Data':`${dd}/${mm}/${date.getFullYear()}`,
+        'Horário':c.time,
+        'Aula':c.name,
+        'Modalidade':CATLABELS[c.cat]||c.cat,
+        'Local':c.local,
+        'Patrocínio':SP_LABEL_EXPORT[c.sp],
+        'Marca':c.brand||'',
+        'Público estimado':c.aud,
+      };
+    });
 }
-async function applyImport(){
-  if(!pendingImport.length)return;
-  classes=pendingImport;pendingImport=[];
-  await saveClasses();updateAll();
-  document.getElementById('previewSection').style.display='none';
-  document.getElementById('uploadResult').className='upload-result ok';
-  document.getElementById('uploadResult').innerHTML='<i class="ti ti-check"></i>Grade atualizada com sucesso!';
-  showToast('Grade importada com sucesso');
-  setPage('grade');
+
+function exportExcel(filter){
+  const rows=getExportRows(filter);
+  if(!rows.length){showToast('Nenhuma aula encontrada para este filtro.');return;}
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const colWidths=[{wch:12},{wch:12},{wch:12},{wch:10},{wch:28},{wch:14},{wch:24},{wch:20},{wch:20},{wch:10}];
+  ws['!cols']=colWidths;
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Grade de Aulas');
+  const fname=filter==='all'?'mude_grade_completa':filter==='open'?'mude_oportunidades':'mude_patrocinadas';
+  XLSX.writeFile(wb,`${fname}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('Planilha exportada com sucesso');
+}
+
+function renderExportPreview(){
+  const rows=getExportRows('all');
+  document.getElementById('exportCount').textContent=rows.length+' aulas no total';
+  document.getElementById('exportPreviewBody').innerHTML=rows.slice(0,50).map(r=>`<tr>
+    <td>${r['Semana']}</td><td>${r['Dia']}</td><td>${r['Data']}</td><td style="font-weight:500">${r['Horário']}</td>
+    <td>${r['Aula']}</td><td><span class="b-cat">${r['Modalidade']}</span></td><td>${r['Local']}</td>
+    <td><span class="badge ${r['Patrocínio']==='Patrocinada direta'?'b-dir':r['Patrocínio']==='Via incentivo'?'b-inc':'b-open'}">${r['Patrocínio']}</span></td>
+    <td>${r['Marca']||'—'}</td><td>${r['Público estimado']}</td>
+  </tr>`).join('')+(rows.length>50?`<tr><td colspan="10" style="text-align:center;color:var(--txf);padding:.75rem">… e mais ${rows.length-50} aulas</td></tr>`:'');
 }
 
 /* ── CHARTS ── */
