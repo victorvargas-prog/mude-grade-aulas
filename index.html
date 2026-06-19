@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mude · Grade de Aulas</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f3f2ee;--surf:#fff;--surf2:#edece8;--surf3:#e5e4e0;
+  --bdr:rgba(0,0,0,.08);--bdr2:rgba(0,0,0,.13);
+  --tx:#18180f;--txm:#65655e;--txf:#9c9c95;
+  --green:#1D9E75;--gdk:#0F6E56;--glt:#dff5ed;
+  --amber:#b87010;--alt:#fef0d5;
+  --red:#c0362a;--rlt:#fdecea;
+  --blue:#1860b8;--blt:#e2eefb;
+  --r:8px;--rl:13px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#111110;--surf:#1b1b18;--surf2:#222220;--surf3:#2a2a26;
+    --bdr:rgba(255,255,255,.07);--bdr2:rgba(255,255,255,.12);
+    --tx:#efede7;--txm:#999890;--txf:#57574f;
+    --glt:#0a2e1f;--alt:#2a1d06;--rlt:#2a0f0d;--blt:#0a1e34;
+  }
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;min-height:100vh}
+
+/* NAV */
+nav{background:var(--surf);border-bottom:.5px solid var(--bdr);padding:0 1.5rem;display:flex;align-items:center;gap:0;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:8px;padding:.8rem 0;margin-right:1.5rem;text-decoration:none}
+.logo-mark{width:30px;height:30px;background:var(--green);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.logo-name{font-size:15px;font-weight:600;letter-spacing:-.02em;color:var(--tx)}
+.logo-sub{font-size:10px;color:var(--txm)}
+.nav-tab{height:48px;padding:0 .9rem;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--txm);cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s}
+.nav-tab:hover{color:var(--tx)}
+.nav-tab.active{color:var(--green);border-bottom-color:var(--green)}
+.nav-tab i{font-size:14px}
+.nav-end{margin-left:auto;display:flex;align-items:center;gap:8px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.live-label{font-size:11px;color:var(--green);font-weight:500}
+.sync-status{font-size:11px;color:var(--txf);display:flex;align-items:center;gap:4px}
+.sync-status i{font-size:12px}
+
+/* PAGES */
+.page{display:none}.page.active{display:block}
+
+/* HERO */
+.hero{background:var(--green);padding:1.5rem 1.5rem 0;color:#fff}
+.hero-eye{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-bottom:4px}
+.hero-title{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.hero-sub{font-size:12px;opacity:.75;margin-top:4px}
+.hero-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:rgba(255,255,255,.18);margin-top:1.25rem}
+.kpi{background:rgba(0,0,0,.13);padding:.75rem 1rem}
+.kpi-v{font-size:20px;font-weight:600;color:#fff}
+.kpi-l{font-size:10px;color:rgba(255,255,255,.65);margin-top:1px}
+
+/* LAYOUT */
+.wrap{max-width:1300px;margin:0 auto;padding:1.25rem 1.5rem}
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;flex-wrap:wrap;gap:8px}
+.section-title{font-size:14px;font-weight:600}
+.section-sub{font-size:11px;color:var(--txm);margin-top:1px}
+
+/* WEEK TABS */
+.week-tabs{display:flex;gap:5px;flex-wrap:wrap}
+.wtab{font-size:11px;font-family:'Inter',sans-serif;font-weight:500;padding:4px 12px;border-radius:20px;border:.5px solid var(--bdr2);background:var(--surf);color:var(--txm);cursor:pointer;transition:all .12s}
+.wtab:hover{background:var(--surf2)}
+.wtab.active{background:var(--green);border-color:var(--green);color:#fff}
+
+/* FILTER BAR */
+.fbar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+.flabel{font-size:11px;color:var(--txf);margin-right:2px}
+.fbtn{font-size:11px;font-family:'Inter',sans-serif;font-weight:500;padding:3px 10px;border-radius:16px;border:.5px solid var(--bdr2);background:var(--surf);color:var(--txm);cursor:pointer;transition:all .12s}
+.fbtn:hover{background:var(--surf2)}
+.fbtn.active{background:var(--tx);border-color:var(--tx);color:var(--surf)}
+
+/* WEEK GRID */
+.wgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+.dcol{background:var(--surf);border:.5px solid var(--bdr);border-radius:var(--rl);overflow:hidden}
+.dcol.today{border-color:var(--green);border-width:1.5px}
+.dhead{padding:8px 9px 7px;border-bottom:.5px solid var(--bdr)}
+.dcol.today .dhead{background:var(--green)}
+.dname{font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--txf)}
+.dcol.today .dname{color:rgba(255,255,255,.7)}
+.dnum{font-size:17px;font-weight:600;letter-spacing:-.02em;color:var(--tx);line-height:1.2}
+.dcol.today .dnum{color:#fff}
+.today-pill{display:inline-block;font-size:8px;font-weight:500;background:rgba(255,255,255,.25);color:#fff;border-radius:3px;padding:1px 5px;margin-top:2px}
+.dclasses{padding:5px;display:flex;flex-direction:column;gap:4px;min-height:50px}
+.dempty{padding:10px 6px;text-align:center;font-size:10px;color:var(--txf)}
+
+/* CLASS CARDS */
+.cc{border-radius:6px;padding:5px 7px;cursor:pointer;transition:transform .1s,opacity .1s;position:relative}
+.cc:hover{transform:scale(1.018);opacity:.9}
+.cc-time{font-size:9px;font-weight:600;margin-bottom:1px}
+.cc-name{font-size:10px;font-weight:500;line-height:1.3}
+.cc-loc{font-size:9px;margin-top:1px;opacity:.75}
+.cc-sp{display:inline-flex;align-items:center;gap:2px;font-size:8px;font-weight:600;margin-top:3px;padding:1px 5px;border-radius:4px}
+.sp-d{background:rgba(29,158,117,.18);color:#0F6E56}
+.sp-i{background:rgba(184,112,16,.18);color:#7a4c00}
+.sp-o{background:rgba(192,54,42,.18);color:#8a1f16}
+.cat-yoga{background:#e1f5ee}.cat-yoga .cc-time{color:#0F6E56}.cat-yoga .cc-name{color:#085041}.cat-yoga .cc-loc{color:#1D9E75}
+.cat-musculacao{background:#e6f1fb}.cat-musculacao .cc-time{color:#185FA5}.cat-musculacao .cc-name{color:#0C447C}.cat-musculacao .cc-loc{color:#378ADD}
+.cat-crossfit{background:#faece7}.cat-crossfit .cc-time{color:#993C1D}.cat-crossfit .cc-name{color:#712B13}.cat-crossfit .cc-loc{color:#D85A30}
+.cat-danca{background:#fbeaf0}.cat-danca .cc-time{color:#993556}.cat-danca .cc-name{color:#72243E}.cat-danca .cc-loc{color:#D4537E}
+.cat-meditacao{background:#eeedfe}.cat-meditacao .cc-time{color:#534AB7}.cat-meditacao .cc-name{color:#3C3489}.cat-meditacao .cc-loc{color:#7F77DD}
+.cat-pilates{background:#faeeda}.cat-pilates .cc-time{color:#854F0B}.cat-pilates .cc-name{color:#633806}.cat-pilates .cc-loc{color:#BA7517}
+.cat-hiit{background:#fcebeb}.cat-hiit .cc-time{color:#A32D2D}.cat-hiit .cc-name{color:#791F1F}.cat-hiit .cc-loc{color:#E24B4A}
+
+/* LEGEND ROW */
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:1rem;padding-top:1rem;border-top:.5px solid var(--bdr)}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txm)}
+.ld{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+
+/* MODAL OVERLAY */
+.overlay{display:none;min-height:500px;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:var(--surf);border-radius:var(--rl);border:.5px solid var(--bdr2);padding:1.5rem;width:100%;max-width:440px}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:1.1rem;display:flex;align-items:center;justify-content:space-between}
+.modal-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--txm);font-family:'Inter',sans-serif;line-height:1}
+.field{margin-bottom:.9rem}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px}
+.field input,.field select{width:100%;padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none}
+.field input:focus,.field select:focus{border-color:var(--green)}
+.field select option{background:var(--surf)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-row{display:flex;gap:8px;margin-top:1.1rem;justify-content:flex-end}
+.btn{font-size:12px;font-family:'Inter',sans-serif;font-weight:500;padding:7px 16px;border-radius:var(--r);cursor:pointer;border:.5px solid var(--bdr2);background:var(--surf2);color:var(--tx);transition:all .12s}
+.btn:hover{background:var(--surf3)}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.btn.primary:hover{background:var(--gdk)}
+.btn.danger{background:var(--rlt);border-color:var(--red);color:var(--red)}
+
+/* OPP TABLE */
+.tbl-wrap{background:var(--surf);border:.5px solid var(--bdr);border-radius:var(--rl);overflow:hidden;margin-bottom:1.5rem}
+.tbl-hd{padding:.75rem 1rem;border-bottom:.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
+.tbl-title{font-size:13px;font-weight:600}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txf);padding:.55rem .9rem;text-align:left;border-bottom:.5px solid var(--bdr);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td{font-size:11px;color:var(--tx);padding:.55rem .9rem;border-bottom:.5px solid var(--bdr);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surf2)}
+.badge{display:inline-flex;align-items:center;gap:2px;font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px}
+.b-open{background:var(--rlt);color:var(--red)}
+.b-inc{background:var(--alt);color:var(--amber)}
+.b-dir{background:var(--glt);color:var(--gdk)}
+.b-cat{font-size:9px;font-weight:500;padding:2px 6px;border-radius:4px;background:var(--surf3);color:var(--txm)}
+
+/* CHARTS PAGE */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem}
+.cc-card{background:var(--surf);border:.5px solid var(--bdr);border-radius:var(--rl);padding:1rem 1.1rem}
+.cc-card.full{grid-column:1/-1}
+.cc-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.cc-sub{font-size:11px;color:var(--txm);margin-bottom:.9rem}
+.cleg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:.75rem}
+.cli{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txm)}
+.clsq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* INSIGHTS */
+.ins-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:1.25rem}
+.ins{background:var(--surf);border:.5px solid var(--bdr);border-radius:var(--rl);padding:.9rem 1rem;display:flex;gap:10px}
+.ins-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.ic-g{background:var(--glt);color:var(--green)}
+.ic-a{background:var(--alt);color:var(--amber)}
+.ic-r{background:var(--rlt);color:var(--red)}
+.ic-b{background:var(--blt);color:var(--blue)}
+.ins-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txf);margin-bottom:3px}
+.ins-txt{font-size:11px;color:var(--tx);line-height:1.5}
+
+/* BRAND REC TABLE */
+.brand-pills{display:flex;gap:4px;flex-wrap:wrap}
+.bpill{font-size:9px;font-weight:500;padding:2px 7px;border-radius:4px;background:var(--surf3);color:var(--txm)}
+
+/* TOAST */
+.toast{display:none;align-items:center;gap:8px;background:var(--tx);color:var(--surf);font-size:12px;font-weight:500;padding:10px 16px;border-radius:var(--r);margin-bottom:.75rem}
+.toast.show{display:flex}
+.toast i{font-size:14px;color:var(--green)}
+
+/* ADD BUTTON */
+.add-btn{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Inter',sans-serif;font-weight:500;padding:5px 12px;border-radius:var(--r);border:.5px solid var(--bdr2);background:var(--surf);color:var(--tx);cursor:pointer;transition:all .12s}
+.add-btn:hover{background:var(--surf2)}
+.add-btn i{font-size:13px}
+
+@media(max-width:900px){.wgrid{grid-template-columns:repeat(4,1fr)}.cgrid{grid-template-columns:1fr}.ins-grid{grid-template-columns:1fr 1fr}.hero-kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.wgrid{grid-template-columns:repeat(2,1fr)}.ins-grid{grid-template-columns:1fr}.hero-kpis{grid-template-columns:repeat(2,1fr)}.wrap{padding:1rem}}
+@media(prefers-reduced-motion:reduce){.cc,.btn,.fbtn,.wtab{transition:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#" onclick="return false">
+    <div class="logo-mark"><i class="ti ti-flame" aria-hidden="true"></i></div>
+    <div><div class="logo-name">Mude</div><div class="logo-sub">Inteligência de grade</div></div>
+  </a>
+  <button class="nav-tab active" id="tab-grade" onclick="setPage('grade')"><i class="ti ti-calendar-week" aria-hidden="true"></i>Grade de aulas</button>
+  <button class="nav-tab" id="tab-trends" onclick="setPage('trends')"><i class="ti ti-chart-line" aria-hidden="true"></i>Tendências</button>
+  <div class="nav-end">
+    <div class="live-dot"></div>
+    <span class="live-label">Ao vivo</span>
+    <span class="sync-status" id="syncStatus"><i class="ti ti-cloud-check" aria-hidden="true"></i>Sincronizado</span>
+  </div>
+</nav>
+
+<!-- ==================== PAGE: GRADE ==================== -->
+<div class="page active" id="page-grade">
+  <div class="hero">
+    <div class="hero-eye">Grade de aulas · Mude Ipanema</div>
+    <div class="hero-title">Próximas 4 semanas</div>
+    <div class="hero-sub">Modalidade, horário, local e status de patrocínio · Edição em tempo real</div>
+    <div class="hero-kpis">
+      <div class="kpi"><div class="kpi-v" id="kpi-total">—</div><div class="kpi-l">Total de aulas</div></div>
+      <div class="kpi"><div class="kpi-v" id="kpi-open">—</div><div class="kpi-l">Sem patrocínio</div></div>
+      <div class="kpi"><div class="kpi-v" id="kpi-inc">—</div><div class="kpi-l">Via incentivo</div></div>
+      <div class="kpi"><div class="kpi-v" id="kpi-dir">—</div><div class="kpi-l">Patrocinadas</div></div>
+      <div class="kpi"><div class="kpi-v" id="kpi-pub">—</div><div class="kpi-l">Público estimado</div></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div id="toast" class="toast"><i class="ti ti-check" aria-hidden="true"></i><span id="toastMsg"></span></div>
+
+    <div class="section-hd">
+      <div><div class="section-title">Selecione a semana</div><div class="section-sub">Clique em uma aula para editar ou vincular patrocinador</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="week-tabs" id="weekTabs"></div>
+        <button class="add-btn" onclick="openAddModal()"><i class="ti ti-plus" aria-hidden="true"></i>Nova aula</button>
+      </div>
+    </div>
+
+    <div class="fbar" id="catF">
+      <span class="flabel">Modalidade:</span>
+      <button class="fbtn active" data-v="all">Todas</button>
+      <button class="fbtn" data-v="yoga">Yoga</button>
+      <button class="fbtn" data-v="musculacao">Musculação</button>
+      <button class="fbtn" data-v="crossfit">CrossFit</button>
+      <button class="fbtn" data-v="danca">Dança</button>
+      <button class="fbtn" data-v="meditacao">Meditação</button>
+      <button class="fbtn" data-v="pilates">Pilates</button>
+      <button class="fbtn" data-v="hiit">HIIT</button>
+    </div>
+    <div class="fbar" id="spF">
+      <span class="flabel">Patrocínio:</span>
+      <button class="fbtn active" data-v="all">Todos</button>
+      <button class="fbtn" data-v="open" style="color:var(--red)">Sem patrocínio</button>
+      <button class="fbtn" data-v="incentive" style="color:var(--amber)">Via incentivo</button>
+      <button class="fbtn" data-v="direct" style="color:var(--green)">Patrocinada</button>
+    </div>
+
+    <div class="wgrid" id="wgrid"></div>
+
+    <div class="legend">
+      <div class="li"><div class="ld" style="background:#1D9E75"></div>Yoga</div>
+      <div class="li"><div class="ld" style="background:#378ADD"></div>Musculação</div>
+      <div class="li"><div class="ld" style="background:#D85A30"></div>CrossFit</div>
+      <div class="li"><div class="ld" style="background:#D4537E"></div>Dança</div>
+      <div class="li"><div class="ld" style="background:#7F77DD"></div>Meditação</div>
+      <div class="li"><div class="ld" style="background:#BA7517"></div>Pilates</div>
+      <div class="li"><div class="ld" style="background:#E24B4A"></div>HIIT</div>
+      <div class="li" style="margin-left:1rem"><div class="ld" style="background:var(--green)"></div>Patrocinada</div>
+      <div class="li"><div class="ld" style="background:var(--amber)"></div>Via incentivo</div>
+      <div class="li"><div class="ld" style="background:var(--red)"></div>Sem patrocínio</div>
+    </div>
+
+    <div style="margin-top:1.75rem">
+      <div class="section-hd">
+        <div><div class="section-title">Aulas sem patrocínio — oportunidades</div><div class="section-sub">Semana selecionada · Clique na linha para vincular uma marca</div></div>
+        <span style="font-size:11px;color:var(--txf)" id="oppCount"></span>
+      </div>
+      <div class="tbl-wrap">
+        <div style="overflow-x:auto"><table id="oppTbl">
+          <colgroup><col style="width:100px"><col style="width:55px"><col style="width:130px"><col style="width:75px"><col style="width:120px"><col style="width:70px"><col style="width:130px"></colgroup>
+          <thead><tr><th>Dia</th><th>Hora</th><th>Aula</th><th>Modalidade</th><th>Local</th><th>Público</th><th>Marcas sugeridas</th></tr></thead>
+          <tbody id="oppBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PAGE: TRENDS ==================== -->
+<div class="page" id="page-trends">
+  <div class="hero" style="padding-bottom:1.5rem">
+    <div class="hero-eye">Análise comparativa · 4 semanas</div>
+    <div class="hero-title">Tendências &amp; Oportunidades</div>
+    <div class="hero-sub">Patrocínio, modalidades e potencial de ativação por semana</div>
+  </div>
+  <div class="wrap">
+    <div class="ins-grid">
+      <div class="ins"><div class="ins-icon ic-r"><i class="ti ti-clock" aria-hidden="true"></i></div><div><div class="ins-lbl">Janela aberta</div><div class="ins-txt" id="ins1"></div></div></div>
+      <div class="ins"><div class="ins-icon ic-a"><i class="ti ti-alert-triangle" aria-hidden="true"></i></div><div><div class="ins-lbl">Atenção</div><div class="ins-txt" id="ins2"></div></div></div>
+      <div class="ins"><div class="ins-icon ic-g"><i class="ti ti-trending-up" aria-hidden="true"></i></div><div><div class="ins-lbl">Melhor semana</div><div class="ins-txt" id="ins3"></div></div></div>
+      <div class="ins"><div class="ins-icon ic-b"><i class="ti ti-building-store" aria-hidden="true"></i></div><div><div class="ins-lbl">Vivo</div><div class="ins-txt" id="ins4"></div></div></div>
+      <div class="ins"><div class="ins-icon ic-g"><i class="ti ti-users" aria-hidden="true"></i></div><div><div class="ins-lbl">Público feminino</div><div class="ins-txt">65% do app é feminino. Yoga, Pilates e Dança concentram esse público — ideal para saúde e beleza.</div></div></div>
+      <div class="ins"><div class="ins-icon ic-a"><i class="ti ti-percentage" aria-hidden="true"></i></div><div><div class="ins-lbl">Cobertura total</div><div class="ins-txt" id="ins6"></div></div></div>
+    </div>
+
+    <div class="cgrid">
+      <div class="cc-card full">
+        <div class="cc-title">Distribuição de patrocínio por semana</div>
+        <div class="cc-sub">Comparação entre aulas patrocinadas, via incentivo e sem patrocínio</div>
+        <div class="cleg">
+          <div class="cli"><div class="clsq" style="background:#1D9E75"></div>Patrocinada direta</div>
+          <div class="cli"><div class="clsq" style="background:#b87010"></div>Via incentivo</div>
+          <div class="cli"><div class="clsq" style="background:#c0362a"></div>Sem patrocínio</div>
+        </div>
+        <div style="position:relative;height:240px"><canvas id="ch1" role="img" aria-label="Barras empilhadas de patrocínio por semana"></canvas></div>
+      </div>
+      <div class="cc-card">
+        <div class="cc-title">Tendência: aulas sem patrocínio</div>
+        <div class="cc-sub">Evolução semanal de slots disponíveis</div>
+        <div class="cleg">
+          <div class="cli"><div class="clsq" style="background:#c0362a"></div>Sem patrocínio</div>
+          <div class="cli"><div class="clsq" style="border:1.5px dashed #1860b8;background:none"></div>Meta (&lt;15)</div>
+        </div>
+        <div style="position:relative;height:200px"><canvas id="ch2" role="img" aria-label="Linha de tendência de aulas sem patrocínio"></canvas></div>
+      </div>
+      <div class="cc-card">
+        <div class="cc-title">Oportunidades por modalidade</div>
+        <div class="cc-sub">Slots sem patrocínio nas 4 semanas</div>
+        <div style="position:relative;height:200px;display:flex;gap:12px;align-items:center">
+          <div style="flex:1;min-width:0;height:200px;position:relative"><canvas id="ch3" role="img" aria-label="Rosca de oportunidades por modalidade"></canvas></div>
+          <div id="ch3leg" style="flex-shrink:0;font-size:10px;display:flex;flex-direction:column;gap:5px"></div>
+        </div>
+      </div>
+      <div class="cc-card full">
+        <div class="cc-title">Slots abertos por modalidade e semana</div>
+        <div class="cc-sub">Identificar onde há mais espaço para ativação por categoria</div>
+        <div class="cleg" id="ch4leg"></div>
+        <div style="position:relative;height:240px"><canvas id="ch4" role="img" aria-label="Barras agrupadas por modalidade e semana"></canvas></div>
+      </div>
+      <div class="cc-card full">
+        <div class="cc-title">Público estimado por tipo de patrocínio</div>
+        <div class="cc-sub">Base: médias históricas Mude — pessoas/aula por modalidade</div>
+        <div class="cleg">
+          <div class="cli"><div class="clsq" style="background:#1D9E75"></div>Patrocinada direta</div>
+          <div class="cli"><div class="clsq" style="background:#b87010"></div>Via incentivo</div>
+          <div class="cli"><div class="clsq" style="background:#c0362a"></div>Sem patrocínio (potencial)</div>
+        </div>
+        <div style="position:relative;height:220px"><canvas id="ch5" role="img" aria-label="Área de público por tipo de patrocínio"></canvas></div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <div class="tbl-hd"><span class="tbl-title">Recomendações de ativação por marca</span><span style="font-size:11px;color:var(--txf)">Baseado em público, modalidade e período</span></div>
+      <div style="overflow-x:auto"><table style="table-layout:auto">
+        <thead><tr><th>Marca</th><th>Segmento</th><th>Modalidades ideais</th><th>Semanas</th><th>Slots abertos</th><th>Público est.</th><th>Tipo de ativação</th></tr></thead>
+        <tbody id="brandRec"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD / EDIT -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title"><span id="modalTitle">Nova aula</span><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div class="row2">
+      <div class="field"><label>Dia da semana</label><select id="fDay">
+        <option value="0">Segunda</option><option value="1">Terça</option><option value="2">Quarta</option>
+        <option value="3">Quinta</option><option value="4">Sexta</option><option value="5">Sábado</option><option value="6">Domingo</option>
+      </select></div>
+      <div class="field"><label>Horário</label><input type="time" id="fTime" value="07:00"></div>
+    </div>
+    <div class="field"><label>Nome da aula</label><input type="text" id="fName" placeholder="Ex: Yoga ao ar livre"></div>
+    <div class="row2">
+      <div class="field"><label>Modalidade</label><select id="fCat">
+        <option value="yoga">Yoga</option><option value="musculacao">Musculação</option>
+        <option value="crossfit">CrossFit</option><option value="danca">Dança</option>
+        <option value="meditacao">Meditação</option><option value="pilates">Pilates</option><option value="hiit">HIIT</option>
+      </select></div>
+      <div class="field"><label>Público estimado</label><input type="number" id="fAud" min="10" max="500" value="80"></div>
+    </div>
+    <div class="field"><label>Local</label><select id="fLocal">
+      <option>Estação Ipanema Norte</option><option>Estação Ipanema Sul</option>
+      <option>Estação Leblon</option><option>Estação Copacabana</option>
+      <option>Estação Botafogo</option><option>Rio Academia</option>
+    </select></div>
+    <div class="row2">
+      <div class="field"><label>Patrocínio</label><select id="fSp">
+        <option value="open">Sem patrocínio</option>
+        <option value="incentive">Via incentivo</option>
+        <option value="direct">Patrocinada direta</option>
+      </select></div>
+      <div class="field"><label>Marca / Patrocinador</label><input type="text" id="fBrand" placeholder="Ex: Vivo, Eleiko..."></div>
+    </div>
+    <div class="field"><label>Semana</label><select id="fWeek">
+      <option value="0">Semana 1</option><option value="1">Semana 2</option>
+      <option value="2">Semana 3</option><option value="3">Semana 4</option>
+    </select></div>
+    <div class="btn-row">
+      <button class="btn danger" id="btnDel" onclick="deleteClass()" style="display:none"><i class="ti ti-trash" style="margin-right:4px;font-size:12px" aria-hidden="true"></i>Excluir</button>
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn primary" onclick="saveClass()"><i class="ti ti-check" style="margin-right:4px;font-size:12px" aria-hidden="true"></i>Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── SEED DATA ── */
+const WEEKS_META=[
+  {label:'Sem. 1',range:'16–22 jun'},
+  {label:'Sem. 2',range:'23–29 jun'},
+  {label:'Sem. 3',range:'30 jun–6 jul'},
+  {label:'Sem. 4',range:'7–13 jul'},
+];
+const BASE=new Date(2026,5,16);
+const DAYNAMES=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const DAYFULL=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+const CATCOLORS={yoga:'#1D9E75',musculacao:'#378ADD',crossfit:'#D85A30',danca:'#D4537E',meditacao:'#7F77DD',pilates:'#BA7517',hiit:'#E24B4A'};
+const CATLABELS={yoga:'Yoga',musculacao:'Musculação',crossfit:'CrossFit',danca:'Dança',meditacao:'Meditação',pilates:'Pilates',hiit:'HIIT'};
+const BRANDMAP={yoga:['Vivo','Danone YoPRO'],musculacao:['Danone YoPRO','Under Armour'],crossfit:['Amstel Ultra','Under Armour'],danca:['Vivo','Santander'],meditacao:['Vivo','Bradesco Saúde'],pilates:['Danone YoPRO','Bradesco Saúde'],hiit:['Amstel Ultra','Under Armour']};
+
+function seedData(){
+  const template=[
+    [{time:'06:30',name:'Yoga ao ar livre',cat:'yoga',local:'Estação Ipanema Norte',sp:'direct',brand:'Eleiko',aud:120},
+     {time:'08:00',name:'Musculação',cat:'musculacao',local:'Estação Ipanema Sul',sp:'incentive',brand:'Bradesco Saúde',aud:80},
+     {time:'10:00',name:'Meditação',cat:'meditacao',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:60},
+     {time:'12:00',name:'HIIT Express',cat:'hiit',local:'Estação Leblon',sp:'open',brand:'',aud:90},
+     {time:'18:00',name:'CrossFit',cat:'crossfit',local:'Estação Leblon',sp:'incentive',brand:'Unimed',aud:110},
+     {time:'19:30',name:'Dança Afro',cat:'danca',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:70}],
+    [{time:'07:00',name:'Pilates',cat:'pilates',local:'Estação Ipanema Sul',sp:'incentive',brand:'Bradesco Saúde',aud:65},
+     {time:'09:00',name:'Yoga Vinyasa',cat:'yoga',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:100},
+     {time:'11:00',name:'Musculação',cat:'musculacao',local:'Estação Leblon',sp:'direct',brand:'Amil',aud:75},
+     {time:'17:00',name:'HIIT',cat:'hiit',local:'Estação Leblon',sp:'open',brand:'',aud:95},
+     {time:'18:30',name:'Meditação',cat:'meditacao',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:55},
+     {time:'20:00',name:'CrossFit',cat:'crossfit',local:'Estação Ipanema Sul',sp:'open',brand:'',aud:100}],
+    [{time:'06:30',name:'Yoga ao ar livre',cat:'yoga',local:'Estação Ipanema Norte',sp:'direct',brand:'Eleiko',aud:115},
+     {time:'08:00',name:'CrossFit',cat:'crossfit',local:'Estação Leblon',sp:'open',brand:'',aud:105},
+     {time:'10:00',name:'Pilates',cat:'pilates',local:'Estação Ipanema Sul',sp:'incentive',brand:'Bradesco Saúde',aud:60},
+     {time:'12:00',name:'HIIT Express',cat:'hiit',local:'Estação Leblon',sp:'open',brand:'',aud:88},
+     {time:'19:00',name:'Dança Contemporânea',cat:'danca',local:'Estação Ipanema Norte',sp:'direct',brand:'YoPRO',aud:72},
+     {time:'20:30',name:'Meditação Noturna',cat:'meditacao',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:48}],
+    [{time:'07:00',name:'Yoga Restaurativa',cat:'yoga',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:95},
+     {time:'09:00',name:'Musculação',cat:'musculacao',local:'Estação Leblon',sp:'incentive',brand:'Unimed',aud:80},
+     {time:'11:00',name:'Pilates',cat:'pilates',local:'Estação Ipanema Sul',sp:'open',brand:'',aud:62},
+     {time:'17:30',name:'CrossFit',cat:'crossfit',local:'Estação Leblon',sp:'open',brand:'',aud:112},
+     {time:'19:00',name:'HIIT',cat:'hiit',local:'Estação Leblon',sp:'direct',brand:'Amil',aud:98},
+     {time:'20:30',name:'Dança de Salão',cat:'danca',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:68}],
+    [{time:'06:30',name:'Yoga ao ar livre',cat:'yoga',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:110},
+     {time:'08:00',name:'Musculação',cat:'musculacao',local:'Estação Ipanema Sul',sp:'direct',brand:'Eleiko',aud:85},
+     {time:'10:00',name:'CrossFit',cat:'crossfit',local:'Estação Leblon',sp:'incentive',brand:'Unimed',aud:108},
+     {time:'12:00',name:'Pilates',cat:'pilates',local:'Estação Ipanema Sul',sp:'open',brand:'',aud:58},
+     {time:'18:00',name:'HIIT Power',cat:'hiit',local:'Estação Leblon',sp:'open',brand:'',aud:102},
+     {time:'19:30',name:'Meditação',cat:'meditacao',local:'Estação Ipanema Norte',sp:'incentive',brand:'Bradesco Saúde',aud:52}],
+    [{time:'07:00',name:'Yoga ao Nascer do Sol',cat:'yoga',local:'Estação Ipanema Norte',sp:'direct',brand:'YoPRO',aud:140},
+     {time:'09:00',name:'CrossFit',cat:'crossfit',local:'Estação Leblon',sp:'open',brand:'',aud:130},
+     {time:'10:30',name:'Dança Afro',cat:'danca',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:90},
+     {time:'12:00',name:'Pilates',cat:'pilates',local:'Estação Ipanema Sul',sp:'incentive',brand:'Bradesco Saúde',aud:70},
+     {time:'15:00',name:'HIIT',cat:'hiit',local:'Estação Leblon',sp:'open',brand:'',aud:120}],
+    [{time:'08:00',name:'Yoga ao ar livre',cat:'yoga',local:'Estação Ipanema Norte',sp:'direct',brand:'Eleiko',aud:150},
+     {time:'09:30',name:'Meditação',cat:'meditacao',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:65},
+     {time:'11:00',name:'Pilates',cat:'pilates',local:'Estação Ipanema Sul',sp:'incentive',brand:'Unimed',aud:72},
+     {time:'16:00',name:'Dança Contemporânea',cat:'danca',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:85}],
+  ];
+  const cycles=[['direct','incentive','open'],['open','direct','incentive'],['incentive','open','direct'],['open','incentive','direct']];
+  const brands={direct:['Eleiko','Amil','YoPRO'],incentive:['Unimed','Bradesco Saúde','Itaú']};
+  const all=[];
+  for(let w=0;w<4;w++){
+    for(let d=0;d<7;d++){
+      template[d].forEach((c,ci)=>{
+        let sp=c.sp,brand=c.brand;
+        if(w>0){sp=cycles[w][ci%3];brand=sp==='direct'?brands.direct[ci%3]:sp==='incentive'?brands.incentive[ci%3]:'';}
+        all.push({id:`${w}-${d}-${ci}`,week:w,day:d,time:c.time,name:c.name,cat:c.cat,local:c.local,sp,brand,aud:c.aud});
+      });
+    }
+  }
+  return all;
+}
+
+/* ── STATE ── */
+let classes=[];
+let curWeek=0,catFilter='all',spFilter='all';
+let editingId=null;
+let charts={};
+
+/* ── STORAGE KEY ── */
+const STORAGE_KEY='mude_classes_v2';
+
+/* ── STORAGE LAYER (window.storage if available, else localStorage) ── */
+async function loadClasses(){
+  setSyncStatus('loading');
+  try{
+    if(window.storage){
+      const r=await window.storage.get(STORAGE_KEY,true);
+      if(r&&r.value){classes=JSON.parse(r.value);setSyncStatus('ok');return;}
+    }
+    const local=localStorage.getItem(STORAGE_KEY);
+    if(local){classes=JSON.parse(local);setSyncStatus('ok');return;}
+  }catch(e){console.warn('load error',e);}
+  classes=seedData();
+  await saveClasses();
+}
+
+async function saveClasses(){
+  setSyncStatus('saving');
+  const json=JSON.stringify(classes);
+  try{
+    if(window.storage){await window.storage.set(STORAGE_KEY,json,true);}
+    localStorage.setItem(STORAGE_KEY,json);
+    setSyncStatus('ok');
+  }catch(e){setSyncStatus('error');console.warn('save error',e);}
+}
+
+function setSyncStatus(s){
+  const el=document.getElementById('syncStatus');
+  if(s==='ok') el.innerHTML='<i class="ti ti-cloud-check" aria-hidden="true"></i>Sincronizado';
+  else if(s==='saving') el.innerHTML='<i class="ti ti-loader" aria-hidden="true"></i>Salvando…';
+  else if(s==='loading') el.innerHTML='<i class="ti ti-loader" aria-hidden="true"></i>Carregando…';
+  else el.innerHTML='<i class="ti ti-alert-circle" aria-hidden="true"></i>Erro ao salvar';
+}
+
+/* ── PAGE NAV ── */
+function setPage(p){
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(e=>e.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('tab-'+p).classList.add('active');
+  if(p==='trends'){rebuildCharts();}
+}
+
+/* ── WEEK TABS ── */
+function buildWeekTabs(){
+  const c=document.getElementById('weekTabs'); c.innerHTML='';
+  WEEKS_META.forEach((w,i)=>{
+    const b=document.createElement('button');
+    b.className='wtab'+(i===0?' active':'');
+    b.textContent=w.label+' · '+w.range;
+    b.onclick=()=>{curWeek=i;document.querySelectorAll('.wtab').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderGrid();renderOppTable();};
+    c.appendChild(b);
+  });
+}
+
+/* ── KPIs ── */
+function updateKPIs(){
+  const all=classes;
+  const total=all.length;
+  const open=all.filter(c=>c.sp==='open').length;
+  const inc=all.filter(c=>c.sp==='incentive').length;
+  const dir=all.filter(c=>c.sp==='direct').length;
+  const pub=all.reduce((s,c)=>s+c.aud,0);
+  document.getElementById('kpi-total').textContent=total;
+  document.getElementById('kpi-open').textContent=open;
+  document.getElementById('kpi-inc').textContent=inc;
+  document.getElementById('kpi-dir').textContent=dir;
+  document.getElementById('kpi-pub').textContent=(pub/1000).toFixed(0)+'k';
+}
+
+/* ── GRID ── */
+const SP_LABEL={direct:'Patrocinada',incentive:'Via incentivo',open:'Sem patrocínio'};
+const SP_CLS={direct:'sp-d',incentive:'sp-i',open:'sp-o'};
+const SP_ICO={direct:'ti-check',incentive:'ti-discount',open:'ti-circle-dotted'};
+
+function renderGrid(){
+  const grid=document.getElementById('wgrid'); grid.innerHTML='';
+  const today=new Date(2026,5,19);
+  for(let d=0;d<7;d++){
+    const date=new Date(BASE); date.setDate(date.getDate()+curWeek*7+d);
+    const isToday=date.toDateString()===today.toDateString();
+    const dayClasses=classes.filter(c=>c.week===curWeek&&c.day===d&&(catFilter==='all'||c.cat===catFilter)&&(spFilter==='all'||c.sp===spFilter))
+      .sort((a,b)=>a.time.localeCompare(b.time));
+    const col=document.createElement('div');
+    col.className='dcol'+(isToday?' today':'');
+    const todayPill=isToday?'<div class="today-pill">hoje</div>':'';
+    const items=dayClasses.length===0?'<div class="dempty">—</div>':dayClasses.map(c=>`
+      <div class="cc cat-${c.cat}" onclick="openEditModal('${c.id}')" title="${c.name} · ${c.local}">
+        <div class="cc-time">${c.time}</div>
+        <div class="cc-name">${c.name}</div>
+        <div class="cc-loc">${c.local.replace('Estação ','')}</div>
+        <div class="cc-sp ${SP_CLS[c.sp]}"><i class="ti ${SP_ICO[c.sp]}" aria-hidden="true"></i>${c.sp==='direct'&&c.brand?c.brand:SP_LABEL[c.sp]}</div>
+      </div>`).join('');
+    col.innerHTML=`<div class="dhead"><div class="dname">${DAYNAMES[d]}</div><div class="dnum">${date.getDate()}</div>${todayPill}</div><div class="dclasses">${items}</div>`;
+    grid.appendChild(col);
+  }
+}
+
+/* ── OPP TABLE ── */
+function renderOppTable(){
+  const rows=classes.filter(c=>c.week===curWeek&&c.sp==='open').sort((a,b)=>a.day-b.day||a.time.localeCompare(b.time));
+  document.getElementById('oppCount').textContent=rows.length+' aulas disponíveis';
+  const tbody=document.getElementById('oppBody');
+  tbody.innerHTML=rows.length===0?'<tr><td colspan="7" style="text-align:center;color:var(--txf);padding:1.5rem">Nenhuma aula sem patrocínio nesta semana.</td></tr>':
+    rows.map(r=>{
+      const date=new Date(BASE); date.setDate(date.getDate()+r.week*7+r.day);
+      const brands=(BRANDMAP[r.cat]||[]).map(b=>`<span class="bpill">${b}</span>`).join('');
+      return`<tr onclick="openEditModal('${r.id}')" style="cursor:pointer" title="Clique para vincular patrocinador">
+        <td>${DAYFULL[r.day]}, ${date.getDate()}/${String(date.getMonth()+1).padStart(2,'0')}</td>
+        <td style="font-weight:500">${r.time}</td>
+        <td>${r.name}</td>
+        <td><span class="b-cat">${CATLABELS[r.cat]}</span></td>
+        <td>${r.local}</td>
+        <td>${r.aud}</td>
+        <td><div class="brand-pills">${brands}</div></td>
+      </tr>`;
+    }).join('');
+}
+
+/* ── MODAL ── */
+function openAddModal(){
+  editingId=null;
+  document.getElementById('modalTitle').textContent='Nova aula';
+  document.getElementById('btnDel').style.display='none';
+  document.getElementById('fDay').value=0;
+  document.getElementById('fTime').value='07:00';
+  document.getElementById('fName').value='';
+  document.getElementById('fCat').value='yoga';
+  document.getElementById('fAud').value=80;
+  document.getElementById('fLocal').value='Estação Ipanema Norte';
+  document.getElementById('fSp').value='open';
+  document.getElementById('fBrand').value='';
+  document.getElementById('fWeek').value=curWeek;
+  document.getElementById('overlay').classList.add('open');
+}
+function openEditModal(id){
+  const c=classes.find(x=>x.id===id); if(!c)return;
+  editingId=id;
+  document.getElementById('modalTitle').textContent='Editar aula';
+  document.getElementById('btnDel').style.display='';
+  document.getElementById('fDay').value=c.day;
+  document.getElementById('fTime').value=c.time;
+  document.getElementById('fName').value=c.name;
+  document.getElementById('fCat').value=c.cat;
+  document.getElementById('fAud').value=c.aud;
+  document.getElementById('fLocal').value=c.local;
+  document.getElementById('fSp').value=c.sp;
+  document.getElementById('fBrand').value=c.brand||'';
+  document.getElementById('fWeek').value=c.week;
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('overlay').classList.remove('open');editingId=null;}
+async function saveClass(){
+  const obj={
+    id:editingId||`${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    week:parseInt(document.getElementById('fWeek').value),
+    day:parseInt(document.getElementById('fDay').value),
+    time:document.getElementById('fTime').value,
+    name:document.getElementById('fName').value.trim()||'Aula',
+    cat:document.getElementById('fCat').value,
+    aud:parseInt(document.getElementById('fAud').value)||80,
+    local:document.getElementById('fLocal').value,
+    sp:document.getElementById('fSp').value,
+    brand:document.getElementById('fBrand').value.trim(),
+  };
+  if(editingId){const i=classes.findIndex(x=>x.id===editingId);if(i>-1)classes[i]=obj;}
+  else{classes.push(obj);}
+  closeModal();
+  await saveClasses();
+  updateAll();
+  showToast(editingId?'Aula atualizada com sucesso':'Nova aula adicionada');
+}
+async function deleteClass(){
+  if(!editingId)return;
+  classes=classes.filter(x=>x.id!==editingId);
+  closeModal();
+  await saveClasses();
+  updateAll();
+  showToast('Aula removida');
+}
+
+/* ── TOAST ── */
+function showToast(msg){
+  const t=document.getElementById('toast'); const m=document.getElementById('toastMsg');
+  m.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+/* ── UPDATE ALL ── */
+function updateAll(){updateKPIs();renderGrid();renderOppTable();}
+
+/* ── FILTERS ── */
+document.getElementById('catF').addEventListener('click',e=>{
+  const b=e.target.closest('.fbtn');if(!b)return;
+  catFilter=b.dataset.v;
+  document.querySelectorAll('#catF .fbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderGrid();
+});
+document.getElementById('spF').addEventListener('click',e=>{
+  const b=e.target.closest('.fbtn');if(!b)return;
+  spFilter=b.dataset.v;
+  document.querySelectorAll('#spF .fbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderGrid();
+});
+
+/* ── CHARTS ── */
+function weekOpen(w){return classes.filter(c=>c.week===w&&c.sp==='open').length;}
+function weekInc(w){return classes.filter(c=>c.week===w&&c.sp==='incentive').length;}
+function weekDir(w){return classes.filter(c=>c.week===w&&c.sp==='direct').length;}
+function weekAud(w,sp){return classes.filter(c=>c.week===w&&c.sp===sp).reduce((s,c)=>s+c.aud,0);}
+
+function rebuildCharts(){
+  const wl=WEEKS_META.map(w=>w.label);
+  const openData=[0,1,2,3].map(weekOpen);
+  const incData=[0,1,2,3].map(weekInc);
+  const dirData=[0,1,2,3].map(weekDir);
+  const destroy=id=>{if(charts[id]){charts[id].destroy();delete charts[id];}};
+
+  destroy('ch1'); destroy('ch2'); destroy('ch3'); destroy('ch4'); destroy('ch5');
+
+  charts.ch1=new Chart(document.getElementById('ch1'),{type:'bar',data:{labels:wl,datasets:[
+    {label:'Patrocinada',data:dirData,backgroundColor:'#1D9E75',borderRadius:4},
+    {label:'Via incentivo',data:incData,backgroundColor:'#b87010',borderRadius:4},
+    {label:'Sem patrocínio',data:openData,backgroundColor:'#c0362a',borderRadius:4},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'rgba(128,128,128,.1)'},ticks:{stepSize:10}}}}});
+
+  charts.ch2=new Chart(document.getElementById('ch2'),{type:'line',data:{labels:wl,datasets:[
+    {label:'Sem patrocínio',data:openData,borderColor:'#c0362a',backgroundColor:'rgba(192,54,42,.08)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:'#c0362a'},
+    {label:'Meta',data:[15,15,15,15],borderColor:'#1860b8',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(128,128,128,.1)'},min:0}}}});
+
+  const cats=Object.keys(CATCOLORS);
+  const catCounts=cats.map(cat=>classes.filter(c=>c.cat===cat&&c.sp==='open').length);
+  charts.ch3=new Chart(document.getElementById('ch3'),{type:'doughnut',data:{labels:cats.map(c=>CATLABELS[c]),datasets:[{data:catCounts,backgroundColor:Object.values(CATCOLORS),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false}}}});
+  const dl=document.getElementById('ch3leg'); dl.innerHTML='';
+  cats.forEach((c,i)=>{ dl.innerHTML+=`<div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txm)"><div style="width:8px;height:8px;border-radius:2px;background:${CATCOLORS[c]};flex-shrink:0"></div>${CATLABELS[c]}<span style="margin-left:auto;font-weight:600;color:var(--tx);padding-left:8px">${catCounts[i]}</span></div>`; });
+
+  const ch4leg=document.getElementById('ch4leg'); ch4leg.innerHTML='';
+  cats.forEach(c=>{ ch4leg.innerHTML+=`<div class="cli"><div class="clsq" style="background:${CATCOLORS[c]}"></div>${CATLABELS[c]}</div>`; });
+  charts.ch4=new Chart(document.getElementById('ch4'),{type:'bar',data:{labels:wl,datasets:cats.map(c=>({label:CATLABELS[c],data:[0,1,2,3].map(w=>classes.filter(cl=>cl.week===w&&cl.cat===c&&cl.sp==='open').length),backgroundColor:CATCOLORS[c],borderRadius:3}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(128,128,128,.1)'},ticks:{stepSize:2}}}}});
+
+  charts.ch5=new Chart(document.getElementById('ch5'),{type:'line',data:{labels:wl,datasets:[
+    {label:'Patrocinada',data:[0,1,2,3].map(w=>weekAud(w,'direct')),borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,.1)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#1D9E75'},
+    {label:'Via incentivo',data:[0,1,2,3].map(w=>weekAud(w,'incentive')),borderColor:'#b87010',backgroundColor:'rgba(184,112,16,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#b87010'},
+    {label:'Sem patrocínio',data:[0,1,2,3].map(w=>weekAud(w,'open')),borderColor:'#c0362a',backgroundColor:'rgba(192,54,42,.07)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#c0362a'},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(128,128,128,.1)'},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}}}}});
+
+  buildInsights(openData,dirData,incData);
+  buildBrandRec();
+}
+
+function buildInsights(openData,dirData,incData){
+  const total=[0,1,2,3].map(w=>classes.filter(c=>c.week===w).length);
+  const maxOpenIdx=openData.indexOf(Math.max(...openData));
+  const maxOpenWk=WEEKS_META[maxOpenIdx];
+  document.getElementById('ins1').textContent=`${maxOpenWk.label} (${maxOpenWk.range}) tem ${openData[maxOpenIdx]} aulas sem patrocínio — maior janela do período.`;
+  const cfOpen=[0,1,2,3].map(w=>classes.filter(c=>c.week===w&&c.cat==='crossfit'&&c.sp==='open').length);
+  const cfMax=Math.max(...cfOpen);
+  document.getElementById('ins2').textContent=`CrossFit tem ${cfMax} slots abertos sem patrocínio nas semanas mais movimentadas. Alto público, baixa cobertura.`;
+  const bestCovIdx=dirData.map((d,i)=>total[i]?Math.round(d/total[i]*100):0).reduce((bi,v,i,a)=>v>a[bi]?i:bi,0);
+  document.getElementById('ins3').textContent=`${WEEKS_META[bestCovIdx].label} tem maior cobertura de patrocínio direto (${dirData[bestCovIdx]} de ${total[bestCovIdx]} aulas).`;
+  const yogaOpen=classes.filter(c=>c.cat==='yoga'&&c.sp==='open').length;
+  document.getElementById('ins4').textContent=`Yoga tem ${yogaOpen} slots abertos nas 4 semanas — perfil de público ideal para Vivo e Danone YoPRO.`;
+  const totalAll=classes.length;
+  const covPct=totalAll?Math.round((classes.filter(c=>c.sp!=='open').length/totalAll)*100):0;
+  document.getElementById('ins6').textContent=`${covPct}% das aulas têm algum tipo de patrocínio. Meta: ≥85%. ${covPct<85?'Ampliar parcerias para atingir a meta.':'Acima da meta — manter qualidade.'}`;
+}
+
+function buildBrandRec(){
+  const recs=[
+    {brand:'Vivo',seg:'Telecom',cats:['yoga','meditacao'],weeks:'2, 3, 4',type:'Naming + branding físico'},
+    {brand:'Amstel Ultra',seg:'Bebidas',cats:['crossfit','hiit'],weeks:'1, 2',type:'Experiência pós-treino'},
+    {brand:'Danone YoPRO',seg:'Nutrição',cats:['musculacao','pilates'],weeks:'1, 3',type:'Sampling + conteúdo'},
+    {brand:'Under Armour',seg:'Moda esportiva',cats:['crossfit','danca','hiit'],weeks:'3, 4',type:'Kit instrutores'},
+    {brand:'Santander',seg:'Financeiro',cats:['yoga','danca'],weeks:'2, 4',type:'Branding de estação'},
+    {brand:'Bradesco Saúde',seg:'Saúde',cats:['meditacao','pilates'],weeks:'1, 2, 3',type:'Lei de Incentivo'},
+  ];
+  document.getElementById('brandRec').innerHTML=recs.map(r=>{
+    const slots=r.cats.reduce((s,c)=>s+classes.filter(cl=>cl.cat===c&&cl.sp==='open').length,0);
+    const pub=r.cats.reduce((s,c)=>s+classes.filter(cl=>cl.cat===c&&cl.sp==='open').reduce((ss,cl)=>ss+cl.aud,0),0);
+    return`<tr>
+      <td style="font-weight:500">${r.brand}</td>
+      <td>${r.seg}</td>
+      <td>${r.cats.map(c=>`<span class="b-cat" style="margin-right:3px">${CATLABELS[c]}</span>`).join('')}</td>
+      <td>Sem. ${r.weeks}</td>
+      <td><span class="badge b-open">${slots} slots</span></td>
+      <td>~${(pub/1000).toFixed(0)}k</td>
+      <td>${r.type}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── POLLING for real-time sync (every 30s) ── */
+setInterval(async()=>{
+  if(!window.storage)return;
+  try{
+    const r=await window.storage.get(STORAGE_KEY,true);
+    if(r&&r.value){
+      const fresh=JSON.parse(r.value);
+      if(JSON.stringify(fresh)!==JSON.stringify(classes)){
+        classes=fresh; updateAll();
+        setSyncStatus('ok');
+      }
+    }
+  }catch(e){}
+},30000);
+
+/* ── INIT ── */
+(async()=>{
+  await loadClasses();
+  buildWeekTabs();
+  updateAll();
+})();
+</script>
+</body>
+</html>
