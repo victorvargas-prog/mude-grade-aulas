@@ -330,7 +330,8 @@ tr:hover td{background:var(--surf2)}
     <div class="hero-sub">Visão consolidada de todas as marcas ativas e slots sem patrocínio</div>
   </div>
   <div class="wrap">
-    <div class="fbar" id="spWeekF">
+    <div style="background:var(--surf);border:.5px solid var(--bdr);border-radius:var(--rl);overflow:hidden;margin-bottom:1.25rem"><div class="tbl-hd"><span class="tbl-title">Patrocinadores ativos · Contratos</span></div><div style="overflow-x:auto"><table style="table-layout:auto" id="sponsorMetaTable"><thead><tr><th>Patrocinador</th><th>Tipo</th><th>Aulas/sem</th><th>Início</th><th>Vencimento</th></tr></thead><tbody id="sponsorMetaBody"></tbody></table></div></div>
+<div class="fbar" id="spWeekF">
       <span class="flabel">Semana:</span>
       <button class="fbtn active" data-v="all">Todas</button>
       <button class="fbtn" data-v="0">Sem. 1</button>
@@ -449,6 +450,7 @@ tr:hover td{background:var(--surf2)}
   <div class="modal">
     <div class="modal-title"><span id="modalTitle">Editar aula</span><button class="modal-close" onclick="closeModal()">×</button></div>
     <div class="field"><label>Nome da aula</label><input type="text" id="fName"></div>
+    <div class="field"><label>Instrutor(a)</label><input type="text" id="fInstrutor" placeholder="Nome do instrutor"></div>
     <div class="row2">
       <div class="field"><label>Horário</label><input type="time" id="fTime"></div>
       <div class="field"><label>Público estimado</label><input type="number" id="fAud" min="10" max="500"></div>
@@ -528,32 +530,24 @@ function setTodayLabel(){
 }
 
 /* ── DATA ── */
-const WEEKS_META=[{label:'Sem. 1',range:'16–22 jun'},{label:'Sem. 2',range:'23–29 jun'},{label:'Sem. 3',range:'30 jun–6 jul'},{label:'Sem. 4',range:'7–13 jul'}];
-const BASE=new Date(2026,5,16);
+const WEEKS_META=[{label:'Sem. 1',range:'16–22 jun',start:[2026,5,16]},{label:'Sem. 2',range:'23–29 jun',start:[2026,5,23]},{label:'Sem. 3',range:'30 jun–6 jul',start:[2026,5,30]},{label:'Sem. 4',range:'7–13 jul',start:[2026,6,7]}];
+const BASE=new Date(2026,5,16); // semana base
 const DAYNAMES=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 const DAYFULL=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
 const CATCOLORS={yoga:'#1D9E75',musculacao:'#378ADD',crossfit:'#D85A30',danca:'#D4537E',meditacao:'#7F77DD',pilates:'#BA7517',hiit:'#E24B4A'};
 const CATLABELS={yoga:'Yoga',musculacao:'Musculação',crossfit:'CrossFit',danca:'Dança',meditacao:'Meditação',pilates:'Pilates',hiit:'HIIT'};
-const BRANDMAP={yoga:['Vivo','Danone YoPRO'],musculacao:['Danone YoPRO','Under Armour'],crossfit:['Amstel Ultra','Under Armour'],danca:['Vivo','Santander'],meditacao:['Vivo','Bradesco Saúde'],pilates:['Danone YoPRO','Bradesco Saúde'],hiit:['Amstel Ultra','Under Armour']};
+const BRANDMAP={yoga:['Vivo','Riachuelo'],musculacao:['Vivo','Riachuelo'],crossfit:['Riachuelo','Porto'],danca:['Riachuelo'],meditacao:['Riachuelo'],pilates:['Vivo','Premier Pet'],hiit:['Porto','Riachuelo']};
+const SPONSOR_META={"Riachuelo": {"tipo": "incentive", "aulas_sem": 9, "inicio": "22/06/2026", "venc": "31/12/2026", "cor": "#2a2a2a"}, "Riachuelo ICMS": {"tipo": "incentive", "aulas_sem": 2, "inicio": "25/06/2026", "venc": "31/12/2026", "cor": "#444444"}, "Porto": {"tipo": "incentive", "aulas_sem": 3, "inicio": "06/07/2026", "venc": "31/12/2026", "cor": "#b89800"}, "Premier Pet": {"tipo": "incentive", "aulas_sem": 2, "inicio": "04/07/2026", "venc": "18/08/2026", "cor": "#c0362a"}, "Vivo": {"tipo": "direct", "aulas_sem": 3, "inicio": "23/02/2026", "venc": "31/12/2026", "cor": "#6c3ea6"}};
 
 function seedData(){
-  const t=[
-    [{time:'06:30',name:'Yoga ao ar livre',cat:'yoga',local:'Estação Ipanema Norte',sp:'direct',brand:'Eleiko',aud:120},{time:'08:00',name:'Musculação',cat:'musculacao',local:'Estação Ipanema Sul',sp:'incentive',brand:'Bradesco Saúde',aud:80},{time:'10:00',name:'Meditação',cat:'meditacao',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:60},{time:'12:00',name:'HIIT Express',cat:'hiit',local:'Estação Leblon',sp:'open',brand:'',aud:90},{time:'18:00',name:'CrossFit',cat:'crossfit',local:'Estação Leblon',sp:'incentive',brand:'Unimed',aud:110},{time:'19:30',name:'Dança Afro',cat:'danca',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:70}],
-    [{time:'07:00',name:'Pilates',cat:'pilates',local:'Estação Ipanema Sul',sp:'incentive',brand:'Bradesco Saúde',aud:65},{time:'09:00',name:'Yoga Vinyasa',cat:'yoga',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:100},{time:'11:00',name:'Musculação',cat:'musculacao',local:'Estação Leblon',sp:'direct',brand:'Amil',aud:75},{time:'17:00',name:'HIIT',cat:'hiit',local:'Estação Leblon',sp:'open',brand:'',aud:95},{time:'18:30',name:'Meditação',cat:'meditacao',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:55},{time:'20:00',name:'CrossFit',cat:'crossfit',local:'Estação Ipanema Sul',sp:'open',brand:'',aud:100}],
-    [{time:'06:30',name:'Yoga ao ar livre',cat:'yoga',local:'Estação Ipanema Norte',sp:'direct',brand:'Eleiko',aud:115},{time:'08:00',name:'CrossFit',cat:'crossfit',local:'Estação Leblon',sp:'open',brand:'',aud:105},{time:'10:00',name:'Pilates',cat:'pilates',local:'Estação Ipanema Sul',sp:'incentive',brand:'Bradesco Saúde',aud:60},{time:'12:00',name:'HIIT Express',cat:'hiit',local:'Estação Leblon',sp:'open',brand:'',aud:88},{time:'19:00',name:'Dança Contemporânea',cat:'danca',local:'Estação Ipanema Norte',sp:'direct',brand:'YoPRO',aud:72},{time:'20:30',name:'Meditação Noturna',cat:'meditacao',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:48}],
-    [{time:'07:00',name:'Yoga Restaurativa',cat:'yoga',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:95},{time:'09:00',name:'Musculação',cat:'musculacao',local:'Estação Leblon',sp:'incentive',brand:'Unimed',aud:80},{time:'11:00',name:'Pilates',cat:'pilates',local:'Estação Ipanema Sul',sp:'open',brand:'',aud:62},{time:'17:30',name:'CrossFit',cat:'crossfit',local:'Estação Leblon',sp:'open',brand:'',aud:112},{time:'19:00',name:'HIIT',cat:'hiit',local:'Estação Leblon',sp:'direct',brand:'Amil',aud:98},{time:'20:30',name:'Dança de Salão',cat:'danca',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:68}],
-    [{time:'06:30',name:'Yoga ao ar livre',cat:'yoga',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:110},{time:'08:00',name:'Musculação',cat:'musculacao',local:'Estação Ipanema Sul',sp:'direct',brand:'Eleiko',aud:85},{time:'10:00',name:'CrossFit',cat:'crossfit',local:'Estação Leblon',sp:'incentive',brand:'Unimed',aud:108},{time:'12:00',name:'Pilates',cat:'pilates',local:'Estação Ipanema Sul',sp:'open',brand:'',aud:58},{time:'18:00',name:'HIIT Power',cat:'hiit',local:'Estação Leblon',sp:'open',brand:'',aud:102},{time:'19:30',name:'Meditação',cat:'meditacao',local:'Estação Ipanema Norte',sp:'incentive',brand:'Bradesco Saúde',aud:52}],
-    [{time:'07:00',name:'Yoga ao Nascer do Sol',cat:'yoga',local:'Estação Ipanema Norte',sp:'direct',brand:'YoPRO',aud:140},{time:'09:00',name:'CrossFit',cat:'crossfit',local:'Estação Leblon',sp:'open',brand:'',aud:130},{time:'10:30',name:'Dança Afro',cat:'danca',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:90},{time:'12:00',name:'Pilates',cat:'pilates',local:'Estação Ipanema Sul',sp:'incentive',brand:'Bradesco Saúde',aud:70},{time:'15:00',name:'HIIT',cat:'hiit',local:'Estação Leblon',sp:'open',brand:'',aud:120}],
-    [{time:'08:00',name:'Yoga ao ar livre',cat:'yoga',local:'Estação Ipanema Norte',sp:'direct',brand:'Eleiko',aud:150},{time:'09:30',name:'Meditação',cat:'meditacao',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:65},{time:'11:00',name:'Pilates',cat:'pilates',local:'Estação Ipanema Sul',sp:'incentive',brand:'Unimed',aud:72},{time:'16:00',name:'Dança Contemporânea',cat:'danca',local:'Estação Ipanema Norte',sp:'open',brand:'',aud:85}],
-  ];
-  const cycles=[['direct','incentive','open'],['open','direct','incentive'],['incentive','open','direct'],['open','incentive','direct']];
-  const brands={direct:['Eleiko','Amil','YoPRO'],incentive:['Unimed','Bradesco Saúde','Itaú']};
+  const template=[{"dia": 0, "time": "06:30", "name": "Yoga", "cat": "yoga", "local": "Arpoador - Praça do Arpoador", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Esther Bruno", "aud": 80}, {"dia": 0, "time": "06:30", "name": "Yoga", "cat": "yoga", "local": "Leblon", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Guga Dale", "aud": 80}, {"dia": 0, "time": "06:30", "name": "Yoga", "cat": "yoga", "local": "Lagoa", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Ana David", "aud": 70}, {"dia": 0, "time": "07:30", "name": "Beach Workout", "cat": "hiit", "local": "Arpoador - Posto 4", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Rafaela Matos", "aud": 60}, {"dia": 0, "time": "08:30", "name": "Yoga", "cat": "yoga", "local": "Lagoa - Platô da Lagoa", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Bianca Coelho", "aud": 65}, {"dia": 0, "time": "16:00", "name": "Mat Pilates", "cat": "pilates", "local": "Lagoa", "sp": "direct", "brand": "Vivo", "instrutor": "Carol Ivantes", "aud": 50}, {"dia": 0, "time": "17:00", "name": "Yoga", "cat": "yoga", "local": "Leblon", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Esther Bruno", "aud": 75}, {"dia": 0, "time": "18:00", "name": "Yoga", "cat": "yoga", "local": "Arpoador - Praça do Arpoador", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Guga Dale", "aud": 80}, {"dia": 1, "time": "06:30", "name": "Yoga", "cat": "yoga", "local": "Arpoador", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Guga Dale", "aud": 80}, {"dia": 1, "time": "06:30", "name": "Yoga", "cat": "yoga", "local": "Lagoa", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Carol Ivantes", "aud": 70}, {"dia": 1, "time": "07:30", "name": "Beach Workout", "cat": "hiit", "local": "Arpoador - Posto 4", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Mika Choeri", "aud": 60}, {"dia": 1, "time": "08:30", "name": "Yoga", "cat": "yoga", "local": "Leblon", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Marcela Gorgulho", "aud": 70}, {"dia": 1, "time": "16:00", "name": "HIIT", "cat": "hiit", "local": "Lagoa", "sp": "incentive", "brand": "Porto", "instrutor": "Rapha Grato", "aud": 55}, {"dia": 1, "time": "17:00", "name": "HIIT", "cat": "hiit", "local": "Leblon", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Marcela Gorgulho", "aud": 65}, {"dia": 1, "time": "18:00", "name": "Yoga", "cat": "yoga", "local": "Arpoador - Praça do Arpoador", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Guga Dale", "aud": 75}, {"dia": 2, "time": "06:30", "name": "Yoga", "cat": "yoga", "local": "Arpoador - Praça do Arpoador", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Ana David", "aud": 80}, {"dia": 2, "time": "06:30", "name": "Yoga", "cat": "yoga", "local": "Leblon", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Carol Ivantes", "aud": 75}, {"dia": 2, "time": "06:30", "name": "Yoga", "cat": "yoga", "local": "Lagoa", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Guga Dale", "aud": 70}, {"dia": 2, "time": "07:30", "name": "HIIT", "cat": "hiit", "local": "Lagoa", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Telmo", "aud": 60}, {"dia": 2, "time": "08:30", "name": "Mat Pilates", "cat": "pilates", "local": "Lagoa - Platô da Lagoa", "sp": "direct", "brand": "Vivo", "instrutor": "Victor Menezes", "aud": 50}, {"dia": 2, "time": "16:00", "name": "Mat Pilates", "cat": "pilates", "local": "Lagoa", "sp": "incentive", "brand": "Premier Pet", "instrutor": "Carol Ivantes", "aud": 50}, {"dia": 2, "time": "17:00", "name": "Yoga", "cat": "yoga", "local": "Leblon", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Marcela Gorgulho", "aud": 70}, {"dia": 2, "time": "18:00", "name": "Yoga", "cat": "yoga", "local": "Arpoador - Praça do Arpoador", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Rafa Matos", "aud": 75}, {"dia": 3, "time": "06:30", "name": "Yoga", "cat": "yoga", "local": "Arpoador - Praça do Arpoador", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Carol Ivantes", "aud": 80}, {"dia": 3, "time": "06:30", "name": "Yoga", "cat": "yoga", "local": "Leblon", "sp": "direct", "brand": "Vivo", "instrutor": "Marcela Gorgulho", "aud": 75}, {"dia": 3, "time": "07:30", "name": "Beach Workout", "cat": "hiit", "local": "Arpoador - Posto 4", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Telmo", "aud": 60}, {"dia": 3, "time": "08:30", "name": "Yoga", "cat": "yoga", "local": "Lagoa - Platô da Lagoa", "sp": "incentive", "brand": "Riachuelo", "instrutor": "James William", "aud": 65}, {"dia": 3, "time": "16:00", "name": "HIIT", "cat": "hiit", "local": "Lagoa", "sp": "incentive", "brand": "Porto", "instrutor": "Rapha Grato", "aud": 55}, {"dia": 3, "time": "16:00", "name": "HIIT", "cat": "hiit", "local": "Leblon", "sp": "incentive", "brand": "Porto", "instrutor": "Victor Menezes", "aud": 60}, {"dia": 3, "time": "17:00", "name": "Yoga", "cat": "yoga", "local": "Leblon", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Marcela Gorgulho", "aud": 70}, {"dia": 3, "time": "18:00", "name": "Yoga", "cat": "yoga", "local": "Arpoador - Praça do Arpoador", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Jully Canellas", "aud": 75}, {"dia": 4, "time": "06:30", "name": "Yoga", "cat": "yoga", "local": "Leblon", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Marcela Gorgulho", "aud": 70}, {"dia": 4, "time": "07:30", "name": "HIIT", "cat": "hiit", "local": "Leblon", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Nathalia", "aud": 55}, {"dia": 4, "time": "08:30", "name": "Yoga", "cat": "yoga", "local": "Lagoa", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Nathalia", "aud": 60}, {"dia": 5, "time": "06:30", "name": "Yoga", "cat": "yoga", "local": "Leblon", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Marcela Gorgulho", "aud": 90}, {"dia": 5, "time": "07:00", "name": "Yoga", "cat": "yoga", "local": "Recreio", "sp": "incentive", "brand": "Riachuelo", "instrutor": "", "aud": 60}, {"dia": 5, "time": "07:30", "name": "Yoga", "cat": "yoga", "local": "Leblon", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Dany Langer", "aud": 85}, {"dia": 5, "time": "08:00", "name": "Yoga", "cat": "yoga", "local": "Engenhão", "sp": "incentive", "brand": "Riachuelo", "instrutor": "", "aud": 55}, {"dia": 5, "time": "09:00", "name": "Yoga", "cat": "yoga", "local": "Península", "sp": "incentive", "brand": "Riachuelo", "instrutor": "Milena Andrade", "aud": 50}, {"dia": 6, "time": "06:00", "name": "Yoga", "cat": "yoga", "local": "Leblon", "sp": "incentive", "brand": "Riachuelo", "instrutor": "", "aud": 60}, {"dia": 6, "time": "07:00", "name": "Yoga", "cat": "yoga", "local": "Madureira - Parque", "sp": "incentive", "brand": "Riachuelo", "instrutor": "", "aud": 45}, {"dia": 6, "time": "08:00", "name": "Yoga", "cat": "yoga", "local": "Parque de Madureira", "sp": "incentive", "brand": "Riachuelo", "instrutor": "", "aud": 50}];
+  // Replicate template across 4 weeks
   const all=[];
-  for(let w=0;w<4;w++) for(let d=0;d<7;d++) t[d].forEach((c,ci)=>{
-    let sp=c.sp,brand=c.brand;
-    if(w>0){sp=cycles[w][ci%3];brand=sp==='direct'?brands.direct[ci%3]:sp==='incentive'?brands.incentive[ci%3]:'';}
-    all.push({id:`${w}-${d}-${ci}`,week:w,day:d,time:c.time,name:c.name,cat:c.cat,local:c.local,sp,brand,aud:c.aud});
-  });
+  for(let w=0;w<4;w++){
+    template.forEach((c,ci)=>{
+      all.push({id:`${w}-${c.dia}-${ci}`,week:w,day:c.dia,time:c.time,name:c.name,cat:c.cat,local:c.local,sp:c.sp,brand:c.brand,instrutor:c.instrutor||'',aud:c.aud});
+    });
+  }
   return all;
 }
 
@@ -621,7 +615,7 @@ function renderGrid(){
     const dc=classes.filter(c=>c.week===curWeek&&c.day===d&&(catFilter==='all'||c.cat===catFilter)&&(spFilter==='all'||c.sp===spFilter)).sort((a,b)=>a.time.localeCompare(b.time));
     const col=document.createElement('div');col.className='dcol'+(isToday?' today':'');
     const tp=isToday?'<div class="today-pill">hoje</div>':'';
-    const items=dc.length===0?'<div class="dempty">—</div>':dc.map(c=>`<div class="cc cat-${c.cat}" onclick="openEditModal('${c.id}')"><div class="cc-time">${c.time}</div><div class="cc-name">${c.name}</div><div class="cc-loc">${c.local.replace('Estação ','')}</div><div class="cc-sp ${SP_CLS[c.sp]}"><i class="ti ${SP_ICO[c.sp]}" aria-hidden="true"></i>${c.sp==='direct'&&c.brand?c.brand:SP_LABEL[c.sp]}</div></div>`).join('');
+    const items=dc.length===0?'<div class="dempty">—</div>':dc.map(c=>`<div class="cc cat-${c.cat}" onclick="openEditModal('${c.id}')"><div class="cc-time">${c.time}</div><div class="cc-name">${c.name}</div><div class="cc-loc">${c.local}</div>${c.instrutor?`<div class="cc-loc" style="font-style:italic">${c.instrutor}</div>`:''}<div class="cc-sp ${SP_CLS[c.sp]}"><i class="ti ${SP_ICO[c.sp]}" aria-hidden="true"></i>${c.brand||SP_LABEL[c.sp]}</div></div>`).join('');
     col.innerHTML=`<div class="dhead"><div class="dname">${DAYNAMES[d]}</div><div class="dnum">${date.getDate()}</div>${tp}</div><div class="dclasses">${items}</div>`;
     grid.appendChild(col);
   }
@@ -637,6 +631,17 @@ function renderOppTable(){
 
 /* ── SPONSORS PAGE ── */
 function renderSponsors(){
+  // Populate contracts table
+  const tbody=document.getElementById('sponsorMetaBody');
+  if(tbody){
+    tbody.innerHTML=Object.entries(SPONSOR_META).map(([name,m])=>`<tr>
+      <td style="font-weight:500;display:flex;align-items:center;gap:7px"><div style="width:10px;height:10px;border-radius:3px;background:${m.cor};flex-shrink:0"></div>${name}</td>
+      <td><span class="badge ${m.tipo==='direct'?'b-dir':'b-inc'}">${m.tipo==='direct'?'Patrocinada direta':'Via incentivo'}</span></td>
+      <td>${m.aulas_sem}</td>
+      <td>${m.inicio}</td>
+      <td>${m.venc}</td>
+    </tr>`).join('');
+  }
   const filtered=classes.filter(c=>(spWeekFilter==='all'||c.week===parseInt(spWeekFilter))&&(spTypeFilter==='all'||c.sp===spTypeFilter));
   const grid=document.getElementById('sponsorGrid');
   if(spTypeFilter==='open'||spTypeFilter==='all'){
@@ -680,6 +685,7 @@ function openEditModal(id){
   document.getElementById('fLocal').value=c.local;
   document.getElementById('fSp').value=c.sp;
   document.getElementById('fBrand').value=c.brand||'';
+  document.getElementById('fInstrutor').value=c.instrutor||'';
   document.getElementById('overlay').classList.add('open');
 }
 function closeModal(){document.getElementById('overlay').classList.remove('open');editingId=null;}
@@ -691,6 +697,7 @@ async function saveClass(){
   c.local=document.getElementById('fLocal').value;
   c.sp=document.getElementById('fSp').value;
   c.brand=document.getElementById('fBrand').value.trim();
+  c.instrutor=document.getElementById('fInstrutor').value.trim();
   closeModal();await saveClasses();updateAll();showToast('Aula atualizada');
 }
 function showToast(msg){
