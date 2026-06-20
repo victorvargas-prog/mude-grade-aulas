@@ -223,6 +223,14 @@ tr:hover td{background:var(--surf2)}
 @media(max-width:900px){.wgrid{grid-template-columns:repeat(4,1fr)}.cgrid{grid-template-columns:1fr}.ins-grid{grid-template-columns:1fr 1fr}.hero-kpis{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:600px){.wgrid{grid-template-columns:repeat(2,1fr)}.ins-grid{grid-template-columns:1fr}.hero-kpis{grid-template-columns:repeat(2,1fr)}.wrap{padding:1rem}.sp-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.cc,.btn,.fbtn,.wtab{transition:none}}
+
+/* TIMETABLE */
+#timetable th,#timetable td{vertical-align:top}
+#timetable tr:hover td:not([colspan="8"]){background:var(--surf2)!important}
+#timetable tr:hover td:first-child{background:var(--surf)!important}
+.tt-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem}
+.tt-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txm)}
+.tt-leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -261,12 +269,12 @@ tr:hover td{background:var(--surf2)}
 <!-- GRADE PAGE -->
 <div class="page active" id="page-grade">
   <div class="hero">
-    <div class="hero-eye">Grade de aulas · Mude Ipanema</div>
-    <div class="hero-title">Próximas 4 semanas</div>
-    <div class="hero-sub">Modalidade, horário, local e status de patrocínio</div>
+    <div class="hero-eye">Grade de aulas · Mude Rio de Janeiro</div>
+    <div class="hero-title">Junho 2026</div>
+    <div class="hero-sub">Modalidade, horário, local e patrocinador por dia da semana</div>
     <div class="hero-kpis">
       <div class="kpi"><div class="kpi-v" id="kpi-total">—</div><div class="kpi-l">Total de aulas</div></div>
-      <div class="kpi"><div class="kpi-v" id="kpi-open">—</div><div class="kpi-l">Sem patrocínio</div></div>
+      <div class="kpi"><div class="kpi-v" id="kpi-open">—</div><div class="kpi-l">Mude Mobiliários</div></div>
       <div class="kpi"><div class="kpi-v" id="kpi-inc">—</div><div class="kpi-l">Via incentivo</div></div>
       <div class="kpi"><div class="kpi-v" id="kpi-dir">—</div><div class="kpi-l">Patrocinadas</div></div>
       <div class="kpi"><div class="kpi-v" id="kpi-pub">—</div><div class="kpi-l">Público estimado</div></div>
@@ -274,54 +282,61 @@ tr:hover td{background:var(--surf2)}
   </div>
   <div class="wrap">
     <div id="toast" class="toast"><i class="ti ti-check" aria-hidden="true"></i><span id="toastMsg"></span></div>
-    <div class="section-hd">
-      <div><div class="section-title">Selecione a semana</div><div class="section-sub">Clique em uma aula para editar patrocinador</div></div>
+
+    <!-- WEEK SELECTOR -->
+    <div class="section-hd" style="margin-bottom:1rem">
       <div class="week-tabs" id="weekTabs"></div>
-    </div>
-    <div class="fbar" id="catF">
-      <span class="flabel">Modalidade:</span>
-      <button class="fbtn active" data-v="all">Todas</button>
-      <button class="fbtn" data-v="yoga">Yoga</button>
-      <button class="fbtn" data-v="musculacao">Musculação</button>
-      <button class="fbtn" data-v="crossfit">CrossFit</button>
-      <button class="fbtn" data-v="danca">Dança</button>
-      <button class="fbtn" data-v="meditacao">Meditação</button>
-      <button class="fbtn" data-v="pilates">Pilates</button>
-      <button class="fbtn" data-v="hiit">HIIT</button>
-      <button class="fbtn" data-v="volei">Vôlei</button>
-      <button class="fbtn" data-v="surf">Surf</button>
+      <div class="fbar" style="margin-bottom:0" id="catF">
+        <span class="flabel">Modalidade:</span>
+        <button class="fbtn active" data-v="all">Todas</button>
+        <button class="fbtn" data-v="yoga">Yoga</button>
+        <button class="fbtn" data-v="hiit">HIIT / Treino</button>
+        <button class="fbtn" data-v="pilates">Pilates</button>
+        <button class="fbtn" data-v="crossfit">CrossTraining</button>
+        <button class="fbtn" data-v="danca">Dança</button>
+        <button class="fbtn" data-v="volei">Vôlei</button>
+        <button class="fbtn" data-v="surf">Surf</button>
+      </div>
     </div>
     <div class="fbar" id="spF">
       <span class="flabel">Patrocínio:</span>
       <button class="fbtn active" data-v="all">Todos</button>
+      <button class="fbtn" data-v="direct" style="color:var(--green)">Direto</button>
+      <button class="fbtn" data-v="incentive" style="color:var(--amber)">Incentivado</button>
       <button class="fbtn" data-v="open" style="color:var(--primary)">Mude Mobiliários</button>
-      <button class="fbtn" data-v="incentive" style="color:var(--amber)">Via incentivo</button>
-      <button class="fbtn" data-v="direct" style="color:var(--green)">Patrocinada</button>
     </div>
-    <div class="wgrid" id="wgrid"></div>
-    <div class="legend">
-      <div class="li"><div class="ld" style="background:#1D9E75"></div>Yoga</div>
-      <div class="li"><div class="ld" style="background:#378ADD"></div>Musculação</div>
-      <div class="li"><div class="ld" style="background:#D85A30"></div>CrossFit</div>
-      <div class="li"><div class="ld" style="background:#D4537E"></div>Dança</div>
-      <div class="li"><div class="ld" style="background:#7F77DD"></div>Meditação</div>
-      <div class="li"><div class="ld" style="background:#BA7517"></div>Pilates</div>
-      <div class="li"><div class="ld" style="background:#E24B4A"></div>HIIT</div>
-      <div class="li" style="margin-left:1rem"><div class="ld" style="background:var(--green)"></div>Patrocinada</div>
-      <div class="li"><div class="ld" style="background:var(--amber)"></div>Via incentivo</div>
-      <div class="li"><div class="ld" style="background:var(--primary)"></div>Mude Mobiliários</div>
-      <div class="li"><div class="ld" style="background:#00897B"></div>Vôlei de Praia</div>
-      <div class="li"><div class="ld" style="background:#0277BD"></div>Surf</div>
+
+    <!-- TIMETABLE GRID -->
+    <div class="tt-legend">
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:#1D9E75"></div>Yoga</div>
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:#E24B4A"></div>HIIT / Treino</div>
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:#BA7517"></div>Pilates</div>
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:#D85A30"></div>CrossTraining</div>
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:#D4537E"></div>Dança</div>
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:#00897B"></div>Vôlei de Praia</div>
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:#0277BD"></div>Surf</div>
+      <div class="tt-leg-item" style="margin-left:.75rem"><div class="tt-leg-dot" style="background:#1D9E75;opacity:.4"></div>Patrocinada</div>
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--amber)"></div>Incentivado</div>
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--primary)"></div>Mude Mobiliários</div>
     </div>
-    <div style="margin-top:1.75rem">
-      <div class="section-hd">
-        <div><div class="section-title">Aulas sem patrocínio — oportunidades</div><div class="section-sub">Semana selecionada · clique na linha para editar</div></div>
-        <span style="font-size:11px;color:var(--txf)" id="oppCount"></span>
-      </div>
-      <div class="tbl-wrap"><div style="overflow-x:auto"><table>
+    <div id="timetableWrap" style="overflow-x:auto;margin-bottom:2rem">
+      <table id="timetable" style="width:100%;border-collapse:collapse;min-width:900px">
+        <thead id="timetableHead"></thead>
+        <tbody id="timetableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- OPP TABLE -->
+    <div class="section-hd">
+      <div><div class="section-title">Aulas Mude Mobiliários — oportunidades</div>
+      <div class="section-sub">Disponíveis para ativação de marcas parceiras · clique para editar</div></div>
+      <span style="font-size:11px;color:var(--txf)" id="oppCount"></span>
+    </div>
+    <div class="tbl-wrap">
+      <div style="overflow-x:auto"><table style="table-layout:auto">
         <thead><tr><th>Dia</th><th>Hora</th><th>Aula</th><th>Modalidade</th><th>Local</th><th>Público</th><th>Marcas sugeridas</th></tr></thead>
         <tbody id="oppBody"></tbody>
-      </table></div></div>
+      </table></div>
     </div>
   </div>
 </div>
@@ -622,22 +637,116 @@ const SP_CLS={direct:'sp-d',incentive:'sp-i',open:'sp-o'};
 const SP_ICO={direct:'ti-check',incentive:'ti-discount',open:'ti-circle-dotted'};
 
 function renderGrid(){
-  const grid=document.getElementById('wgrid');grid.innerHTML='';
-  const today=new Date();
-  const wStart=WEEKS_META[curWeek].start;
-  for(let d=0;d<7;d++){
-    const date=new Date(wStart[0],wStart[1],wStart[2]+d);
-    const isToday=date.toDateString()===today.toDateString();
-    const dc=classes.filter(c=>c.week===curWeek&&c.day===d&&(catFilter==='all'||c.cat===catFilter)&&(spFilter==='all'||c.sp===spFilter)).sort((a,b)=>a.time.localeCompare(b.time));
-    const col=document.createElement('div');col.className='dcol'+(isToday?' today':'');
-    const tp=isToday?'<div class="today-pill">hoje</div>':'';
-    const items=dc.length===0?'<div class="dempty">—</div>':dc.map(c=>`<div class="cc cat-${c.cat}" onclick="openEditModal('${c.id}')"><div class="cc-time">${c.time}</div><div class="cc-name">${c.name}</div><div class="cc-loc">${c.local}</div>${c.instrutor?`<div class="cc-loc" style="font-style:italic">${c.instrutor}</div>`:''}<div class="cc-sp ${SP_CLS[c.sp]}"><i class="ti ${SP_ICO[c.sp]}" aria-hidden="true"></i>${c.brand||SP_LABEL[c.sp]}</div></div>`).join('');
-    col.innerHTML=`<div class="dhead"><div class="dname">${DAYNAMES[d]}</div><div class="dnum">${date.getDate()}</div>${tp}</div><div class="dclasses">${items}</div>`;
-    grid.appendChild(col);
+  const wStart = WEEKS_META[curWeek].start;
+  const DAYS = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+  const DNAMES = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+
+  // Filter classes for current week
+  const wClasses = classes.filter(c =>
+    c.week === curWeek &&
+    (catFilter==='all' || c.cat===catFilter || (catFilter==='hiit' && ['hiit','crossfit','surf'].includes(c.cat))) &&
+    (spFilter==='all' || c.sp===spFilter)
+  );
+
+  // Collect all unique times, sorted
+  const allTimes = [...new Set(wClasses.map(c=>c.time))].sort();
+
+  if(allTimes.length === 0){
+    document.getElementById('timetableHead').innerHTML='';
+    document.getElementById('timetableBody').innerHTML=`<tr><td colspan="8" style="text-align:center;padding:2.5rem;color:var(--txf);font-size:13px">Nenhuma aula encontrada com os filtros selecionados.</td></tr>`;
+    return;
   }
+
+  const today = new Date();
+
+  // Build header row: Horário + 7 day columns
+  const headRow = document.createElement('tr');
+  headRow.innerHTML = `<th style="width:70px;padding:8px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txf);border-bottom:.5px solid var(--bdr);background:var(--surf);position:sticky;left:0;z-index:2">Horário</th>` +
+    Array.from({length:7},(_,d)=>{
+      const dt = new Date(wStart[0],wStart[1],wStart[2]+d);
+      const isTod = dt.toDateString()===today.toDateString();
+      const dd = dt.getDate();
+      const mm = String(dt.getMonth()+1).padStart(2,'0');
+      return `<th style="min-width:130px;padding:8px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;border-bottom:.5px solid var(--bdr);border-left:.5px solid var(--bdr);background:${isTod?'var(--primary)':'var(--surf)'};color:${isTod?'#fff':'var(--txm)'}">
+        <div>${DNAMES[d]}</div><div style="font-size:16px;font-weight:600;letter-spacing:-.02em;color:${isTod?'#fff':'var(--tx)'}">${dd}/${mm}</div>
+        ${isTod?'<div style="font-size:9px;opacity:.75;margin-top:2px">hoje</div>':''}
+      </th>`;
+    }).join('');
+  document.getElementById('timetableHead').innerHTML='';
+  document.getElementById('timetableHead').appendChild(headRow);
+
+  // Build body: one row per time slot
+  const SP_PILL={
+    direct:`<span style="display:inline-flex;align-items:center;gap:2px;font-size:8px;font-weight:600;padding:1px 5px;border-radius:3px;background:rgba(29,158,117,.15);color:#0F6E56"><i class="ti ti-check" style="font-size:8px"></i>`,
+    incentive:`<span style="display:inline-flex;align-items:center;gap:2px;font-size:8px;font-weight:600;padding:1px 5px;border-radius:3px;background:rgba(184,112,16,.15);color:#7a4c00"><i class="ti ti-discount" style="font-size:8px"></i>`,
+    open:`<span style="display:inline-flex;align-items:center;gap:2px;font-size:8px;font-weight:600;padding:1px 5px;border-radius:3px;background:rgba(237,24,71,.12);color:#9c0f2e"><i class="ti ti-circle-dotted" style="font-size:8px"></i>`
+  };
+  const CAT_COLOR={yoga:'#1D9E75',musculacao:'#378ADD',crossfit:'#D85A30',danca:'#D4537E',meditacao:'#7F77DD',pilates:'#BA7517',hiit:'#E24B4A',volei:'#00897B',surf:'#0277BD'};
+  const CAT_BG={yoga:'#e1f5ee',musculacao:'#e6f1fb',crossfit:'#faece7',danca:'#fbeaf0',meditacao:'#eeedfe',pilates:'#faeeda',hiit:'#fcebeb',volei:'#e0f2f1',surf:'#e1f0f8'};
+
+  // Group by time+day
+  const grid={};
+  wClasses.forEach(c=>{
+    if(!grid[c.time]) grid[c.time]={};
+    if(!grid[c.time][c.day]) grid[c.time][c.day]=[];
+    grid[c.time][c.day].push(c);
+  });
+
+  // Separate manhã/tarde
+  const manha = allTimes.filter(t=>t<'13:00');
+  const tarde  = allTimes.filter(t=>t>='13:00');
+
+  const tbody = document.getElementById('timetableBody');
+  tbody.innerHTML='';
+
+  const makeSection = (label, times) => {
+    if(!times.length) return;
+    // Section header
+    const hRow = document.createElement('tr');
+    hRow.innerHTML=`<td colspan="8" style="background:var(--surf2);padding:6px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--txf);border-top:.5px solid var(--bdr);border-bottom:.5px solid var(--bdr)">${label}</td>`;
+    tbody.appendChild(hRow);
+
+    times.forEach(time=>{
+      const row = document.createElement('tr');
+      row.style.borderBottom='.5px solid var(--bdr)';
+      let cells = `<td style="padding:8px 10px;font-size:12px;font-weight:600;color:var(--tx);background:var(--surf);position:sticky;left:0;z-index:1;border-right:.5px solid var(--bdr);vertical-align:top;white-space:nowrap">${time}</td>`;
+
+      for(let d=0;d<7;d++){
+        const dayClasses = (grid[time]&&grid[time][d])||[];
+        if(!dayClasses.length){
+          cells += `<td style="padding:6px;border-left:.5px solid var(--bdr);vertical-align:top;background:var(--surf)"></td>`;
+        } else {
+          const cards = dayClasses.map(c=>{
+            const bg = CAT_BG[c.cat]||'#f5f4f0';
+            const col = CAT_COLOR[c.cat]||'#666';
+            const catLabel = CATLABELS[c.cat]||c.cat;
+            const brandText = c.brand||'—';
+            const pill = SP_PILL[c.sp]||SP_PILL.open;
+            const loc = c.local.replace('Estação ','').replace(' - ',' · ');
+            const inst = c.instrutor ? `<div style="font-size:9px;color:${col};margin-top:1px;font-style:italic">${c.instrutor}</div>` : '';
+            return `<div onclick="openEditModal('${c.id}')" style="background:${bg};border-radius:7px;padding:6px 8px;margin-bottom:4px;cursor:pointer;transition:opacity .1s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+              <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">
+                <span style="font-size:9px;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.04em">${catLabel}</span>
+              </div>
+              <div style="font-size:11px;font-weight:600;color:#1a1a18;line-height:1.3">${c.name}</div>
+              <div style="font-size:9px;color:#666;margin-top:2px">${loc}</div>
+              ${inst}
+              <div style="margin-top:4px">${pill}${brandText}</span></div>
+            </div>`;
+          }).join('');
+          cells += `<td style="padding:6px;border-left:.5px solid var(--bdr);vertical-align:top;background:var(--surf)">${cards}</td>`;
+        }
+      }
+      row.innerHTML=cells;
+      tbody.appendChild(row);
+    });
+  };
+
+  makeSection('MANHÃ', manha);
+  makeSection('TARDE', tarde);
 }
 
-/* ── OPP TABLE ── */
+
 function renderOppTable(){
   const rows=classes.filter(c=>c.week===curWeek&&c.sp==='open').sort((a,b)=>a.day-b.day||a.time.localeCompare(b.time));
   document.getElementById('oppCount').textContent=rows.length+' disponíveis';
