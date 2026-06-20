@@ -982,7 +982,7 @@ function rebuildCharts(){
   const maxOI=openD.indexOf(Math.max(...openD));
   document.getElementById('ins1').textContent=`${WEEKS_META[maxOI].label} (${WEEKS_META[maxOI].range}) tem ${openD[maxOI]} aulas sem patrocínio — maior janela do período.`;
   const cfO=[0,1,2,3].map(w=>classes.filter(c=>c.week===w&&c.cat==='crossfit'&&c.sp==='open').length);
-  document.getElementById('ins2').textContent=`CrossFit tem ${Math.max(...cfO)} slots CrossFit abertos sem patrocínio. Prioridade para ativação.\`;
+  document.getElementById('ins2').textContent=`CrossFit tem ${Math.max(...cfO)} slots CrossFit abertos sem patrocínio. Prioridade para ativação.`;
   const bestI=dirD.map((d,i)=>totalW[i]?Math.round(d/totalW[i]*100):0).reduce((bi,v,i,a)=>v>a[bi]?i:bi,0);
   document.getElementById('ins3').textContent=`${WEEKS_META[bestI].label} tem maior cobertura de patrocínio direto (${dirD[bestI]} de ${totalW[bestI]} aulas).`;
   document.getElementById('ins4').textContent=`Yoga tem ${classes.filter(c=>c.cat==='yoga'&&c.sp==='open').length} slots abertos — perfil ideal para Vivo e Danone YoPRO.`;
