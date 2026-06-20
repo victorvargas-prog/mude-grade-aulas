@@ -474,7 +474,7 @@ tr:hover td{background:var(--surf2)}
 <script>
 const ACCESS_CODE='Mud3Aulas';
 const SESSION_KEY='mude_auth_v3';
-const STORAGE_KEY='mude_classes_v4';
+const STORAGE_KEY='mude_classes_v5';
 
 /* ── AUTH ── */
 function tryLogin(){
@@ -533,7 +533,6 @@ function setTodayLabel(){
 
 /* ── DATA ── */
 const WEEKS_META=[{label:'Sem. 1',range:'16–22 jun',start:[2026,5,16]},{label:'Sem. 2',range:'22–28 jun',start:[2026,5,22]}];
-const BASE=new Date(2026,5,16); // semana base
 const DAYNAMES=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 const DAYFULL=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
 const CATCOLORS={yoga:'#1D9E75',musculacao:'#378ADD',crossfit:'#D85A30',danca:'#D4537E',meditacao:'#7F77DD',pilates:'#BA7517',hiit:'#E24B4A',volei:'#00897B',surf:'#0277BD'};
@@ -560,15 +559,27 @@ let spWeekFilter='all',spTypeFilter='all';
 
 
 async function loadClasses(){
+  // Always start from the canonical PDF data
+  const base=seedData();
+  // Then overlay any user edits saved in storage (sp, brand, instrutor changes)
+  let edits=[];
   try{
-    if(window.storage){const r=await window.storage.get(STORAGE_KEY,true);if(r&&r.value){classes=JSON.parse(r.value);return;}}
-    const local=localStorage.getItem(STORAGE_KEY);
-    if(local){classes=JSON.parse(local);return;}
+    if(window.storage){const r=await window.storage.get(STORAGE_KEY,true);if(r&&r.value)edits=JSON.parse(r.value);}
+    if(!edits.length){const local=localStorage.getItem(STORAGE_KEY);if(local)edits=JSON.parse(local);}
   }catch(e){}
-  classes=seedData();await saveClasses();
+  if(edits.length){
+    // Only apply edits if they came from the same seed (match by id)
+    const editMap={};edits.forEach(e=>editMap[e.id]=e);
+    classes=base.map(c=>editMap[c.id]?{...c,...editMap[c.id],id:c.id,week:c.week,day:c.day}:c);
+  } else {
+    classes=base;
+  }
 }
 async function saveClasses(){
-  const json=JSON.stringify(classes);
+  // Save only edited classes (sp/brand/instrutor changed from seed)
+  const seed=seedData();const seedMap={};seed.forEach(c=>seedMap[c.id]=c);
+  const edits=classes.filter(c=>seedMap[c.id]&&(c.sp!==seedMap[c.id].sp||c.brand!==seedMap[c.id].brand||c.instrutor!==seedMap[c.id].instrutor));
+  const json=JSON.stringify(edits);
   try{if(window.storage)await window.storage.set(STORAGE_KEY,json,true);}catch(e){}
   try{localStorage.setItem(STORAGE_KEY,json);}catch(e){}
 }
@@ -613,8 +624,9 @@ const SP_ICO={direct:'ti-check',incentive:'ti-discount',open:'ti-circle-dotted'}
 function renderGrid(){
   const grid=document.getElementById('wgrid');grid.innerHTML='';
   const today=new Date();
+  const wStart=WEEKS_META[curWeek].start;
   for(let d=0;d<7;d++){
-    const date=new Date(BASE);date.setDate(date.getDate()+curWeek*7+d);
+    const date=new Date(wStart[0],wStart[1],wStart[2]+d);
     const isToday=date.toDateString()===today.toDateString();
     const dc=classes.filter(c=>c.week===curWeek&&c.day===d&&(catFilter==='all'||c.cat===catFilter)&&(spFilter==='all'||c.sp===spFilter)).sort((a,b)=>a.time.localeCompare(b.time));
     const col=document.createElement('div');col.className='dcol'+(isToday?' today':'');
@@ -630,7 +642,7 @@ function renderOppTable(){
   const rows=classes.filter(c=>c.week===curWeek&&c.sp==='open').sort((a,b)=>a.day-b.day||a.time.localeCompare(b.time));
   document.getElementById('oppCount').textContent=rows.length+' disponíveis';
   document.getElementById('oppBody').innerHTML=rows.length===0?'<tr><td colspan="7" style="text-align:center;color:var(--txf);padding:1.5rem">Nenhuma aula sem patrocínio nesta semana.</td></tr>':
-    rows.map(r=>{const date=new Date(BASE);date.setDate(date.getDate()+r.week*7+r.day);const brands=(BRANDMAP[r.cat]||[]).map(b=>`<span class="bpill">${b}</span>`).join('');return`<tr onclick="openEditModal('${r.id}')" style="cursor:pointer"><td>${DAYFULL[r.day]}, ${date.getDate()}/${String(date.getMonth()+1).padStart(2,'0')}</td><td style="font-weight:500">${r.time}</td><td>${r.name}</td><td><span class="b-cat">${CATLABELS[r.cat]||r.cat}</span></td><td>${r.local}</td><td>${r.aud}</td><td><div class="brand-pills">${brands}</div></td></tr>`;}).join('');
+    rows.map(r=>{const ws=WEEKS_META[r.week].start;const date=new Date(ws[0],ws[1],ws[2]+r.day);const brands=(BRANDMAP[r.cat]||[]).map(b=>`<span class="bpill">${b}</span>`).join('');return`<tr onclick="openEditModal('${r.id}')" style="cursor:pointer"><td>${DAYFULL[r.day]}, ${date.getDate()}/${String(date.getMonth()+1).padStart(2,'0')}</td><td style="font-weight:500">${r.time}</td><td>${r.name}</td><td><span class="b-cat">${CATLABELS[r.cat]||r.cat}</span></td><td>${r.local}</td><td>${r.aud}</td><td><div class="brand-pills">${brands}</div></td></tr>`;}).join('');
 }
 
 /* ── SPONSORS PAGE ── */
@@ -650,13 +662,13 @@ function renderSponsors(){
   const grid=document.getElementById('sponsorGrid');
   if(spTypeFilter==='open'||spTypeFilter==='all'){
     const open=filtered.filter(c=>c.sp==='open');
-    let openHtml=open.length===0?'':(`<div class="no-sp-card"><div class="no-sp-head"><i class="ti ti-circle-dotted" aria-hidden="true"></i>Sem patrocínio (${open.length} aulas)</div>`+open.sort((a,b)=>a.week-b.week||a.day-b.day||a.time.localeCompare(b.time)).map(c=>{const date=new Date(BASE);date.setDate(date.getDate()+c.week*7+c.day);const brands=(BRANDMAP[c.cat]||[]).map(b=>`<span class="bpill">${b}</span>`).join('');return`<div class="sp-class-row"><div class="sp-class-left"><div class="sp-class-name">${c.name}</div><div class="sp-class-meta">${DAYFULL[c.day]} ${date.getDate()}/${String(date.getMonth()+1).padStart(2,'0')} · ${c.time} · ${c.local}</div></div><div class="brand-pills">${brands}</div></div>`;}).join('')+'</div>');
+    let openHtml=open.length===0?'':(`<div class="no-sp-card"><div class="no-sp-head"><i class="ti ti-circle-dotted" aria-hidden="true"></i>Sem patrocínio (${open.length} aulas)</div>`+open.sort((a,b)=>a.week-b.week||a.day-b.day||a.time.localeCompare(b.time)).map(c=>{const _ws=WEEKS_META[c.week].start;const date=new Date(_ws[0],_ws[1],_ws[2]+c.day);const brands=(BRANDMAP[c.cat]||[]).map(b=>`<span class="bpill">${b}</span>`).join('');return`<div class="sp-class-row"><div class="sp-class-left"><div class="sp-class-name">${c.name}</div><div class="sp-class-meta">${DAYFULL[c.day]} ${date.getDate()}/${String(date.getMonth()+1).padStart(2,'0')} · ${c.time} · ${c.local}</div></div><div class="brand-pills">${brands}</div></div>`;}).join('')+'</div>');
     const brands={};
     filtered.filter(c=>c.sp!=='open'&&c.brand).forEach(c=>{if(!brands[c.brand])brands[c.brand]={name:c.brand,direct:[],incentive:[]};brands[c.brand][c.sp].push(c);});
     const brandCards=Object.values(brands).sort((a,b)=>a.name.localeCompare(b.name)).map(b=>{
       const all=[...b.direct,...b.incentive].sort((x,y)=>x.week-y.week||x.day-y.day||x.time.localeCompare(y.time));
       const pub=all.reduce((s,c)=>s+c.aud,0);
-      const rows=all.map(c=>{const date=new Date(BASE);date.setDate(date.getDate()+c.week*7+c.day);return`<div class="sp-class-row"><div class="sp-class-left"><div class="sp-class-name">${c.name}</div><div class="sp-class-meta">${DAYFULL[c.day]} ${date.getDate()}/${String(date.getMonth()+1).padStart(2,'0')} · ${c.time} · ${c.local}</div></div><span class="badge ${c.sp==='direct'?'b-dir':'b-inc'}">${c.sp==='direct'?'Direta':'Incentivo'}</span></div>`;}).join('');
+      const rows=all.map(c=>{const _ws=WEEKS_META[c.week].start;const date=new Date(_ws[0],_ws[1],_ws[2]+c.day);return`<div class="sp-class-row"><div class="sp-class-left"><div class="sp-class-name">${c.name}</div><div class="sp-class-meta">${DAYFULL[c.day]} ${date.getDate()}/${String(date.getMonth()+1).padStart(2,'0')} · ${c.time} · ${c.local}</div></div><span class="badge ${c.sp==='direct'?'b-dir':'b-inc'}">${c.sp==='direct'?'Direta':'Incentivo'}</span></div>`;}).join('');
       const initials=b.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
       return`<div class="sp-card"><div class="sp-card-head"><div><div class="sp-card-name" style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:7px;background:var(--primary-lt);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${initials}</div>${b.name}</div><div class="sp-card-seg">${b.direct.length} direta${b.direct.length!==1?'s':''} · ${b.incentive.length} incentivo</div></div></div><div class="sp-card-body">${rows}</div><div class="sp-stat"><span>Público est.: <strong>${pub.toLocaleString('pt-BR')}</strong></span><span>Aulas: <strong>${all.length}</strong></span></div></div>`;
     }).join('');
@@ -667,7 +679,7 @@ function renderSponsors(){
     const brandCards=Object.values(brands).sort((a,b)=>a.name.localeCompare(b.name)).map(b=>{
       const all=[...( b.direct||[]),...(b.incentive||[])].sort((x,y)=>x.week-y.week||x.day-y.day);
       const pub=all.reduce((s,c)=>s+c.aud,0);
-      const rows=all.map(c=>{const date=new Date(BASE);date.setDate(date.getDate()+c.week*7+c.day);return`<div class="sp-class-row"><div class="sp-class-left"><div class="sp-class-name">${c.name}</div><div class="sp-class-meta">${DAYFULL[c.day]} ${date.getDate()}/${String(date.getMonth()+1).padStart(2,'0')} · ${c.time} · ${c.local}</div></div><span class="badge ${c.sp==='direct'?'b-dir':'b-inc'}">${c.sp==='direct'?'Direta':'Incentivo'}</span></div>`;}).join('');
+      const rows=all.map(c=>{const _ws=WEEKS_META[c.week].start;const date=new Date(_ws[0],_ws[1],_ws[2]+c.day);return`<div class="sp-class-row"><div class="sp-class-left"><div class="sp-class-name">${c.name}</div><div class="sp-class-meta">${DAYFULL[c.day]} ${date.getDate()}/${String(date.getMonth()+1).padStart(2,'0')} · ${c.time} · ${c.local}</div></div><span class="badge ${c.sp==='direct'?'b-dir':'b-inc'}">${c.sp==='direct'?'Direta':'Incentivo'}</span></div>`;}).join('');
       const initials=b.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
       return`<div class="sp-card"><div class="sp-card-head"><div><div class="sp-card-name" style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:7px;background:var(--primary-lt);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${initials}</div>${b.name}</div><div class="sp-card-seg">${(b.direct||[]).length} direta${(b.direct||[]).length!==1?'s':''} · ${(b.incentive||[]).length} incentivo</div></div></div><div class="sp-card-body">${rows}</div><div class="sp-stat"><span>Público: <strong>${pub.toLocaleString('pt-BR')}</strong></span><span>Aulas: <strong>${all.length}</strong></span></div></div>`;
     }).join('');
@@ -722,7 +734,7 @@ function getExportRows(filter){
     .filter(c=>filter==='all'||(filter==='open'&&c.sp==='open')||(filter==='sponsored'&&c.sp!=='open'))
     .sort((a,b)=>a.week-b.week||a.day-b.day||a.time.localeCompare(b.time))
     .map(c=>{
-      const date=new Date(BASE_DATE);date.setDate(date.getDate()+c.week*7+c.day);
+      const _ews=WEEKS_META[c.week].start;const date=new Date(_ews[0],_ews[1],_ews[2]+c.day);
       const dd=String(date.getDate()).padStart(2,'0');
       const mm=String(date.getMonth()+1).padStart(2,'0');
       return{
