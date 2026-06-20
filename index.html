@@ -501,13 +501,7 @@ tr:hover td{background:var(--surf2)}
         <div class="cleg" id="ch4leg"></div>
         <div style="position:relative;height:240px"><canvas id="ch4" role="img" aria-label="Barras agrupadas"></canvas></div>
       </div>
-      <div class="cc-card full">
-        <div class="cc-title">Público estimado por tipo de patrocínio</div>
-        <div class="cc-sub">Base: médias históricas Mude</div>
-        <div class="cleg"><div class="cli"><div class="clsq" style="background:#1D9E75"></div>Patrocinada</div><div class="cli"><div class="clsq" style="background:#b87010"></div>Via incentivo</div><div class="cli"><div class="clsq" style="background:#ed1847"></div>Sem patrocínio (potencial)</div></div>
-        <div style="position:relative;height:220px"><canvas id="ch5" role="img" aria-label="Área de público"></canvas></div>
-      </div>
-    </div>
+          </div>
     <div class="tbl-wrap">
       <div class="tbl-hd"><span class="tbl-title">Recomendações por marca parceira</span></div>
       <div style="overflow-x:auto"><table style="table-layout:auto">
@@ -856,10 +850,10 @@ function renderSponsors(){
     filtered.filter(c=>c.sp!=='open'&&c.brand).forEach(c=>{if(!brands[c.brand])brands[c.brand]={name:c.brand,direct:[],incentive:[]};brands[c.brand][c.sp].push(c);});
     const brandCards=Object.values(brands).sort((a,b)=>a.name.localeCompare(b.name)).map(b=>{
       const all=[...b.direct,...b.incentive].sort((x,y)=>x.week-y.week||x.day-y.day||x.time.localeCompare(y.time));
-      const pub=all.reduce((s,c)=>s+c.aud,0);
+      
       const rows=all.map(c=>{const _ws=WEEKS_META[c.week].start;const date=new Date(_ws[0],_ws[1],_ws[2]+c.day);return`<div class="sp-class-row"><div class="sp-class-left"><div class="sp-class-name">${c.name}</div><div class="sp-class-meta">${DAYFULL[c.day]} ${date.getDate()}/${String(date.getMonth()+1).padStart(2,'0')} · ${c.time} · ${c.local}</div></div><span class="badge ${c.sp==='direct'?'b-dir':'b-inc'}">${c.sp==='direct'?'Direta':'Incentivo'}</span></div>`;}).join('');
       const initials=b.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-      return`<div class="sp-card"><div class="sp-card-head"><div><div class="sp-card-name" style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:7px;background:var(--primary-lt);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${initials}</div>${b.name}</div><div class="sp-card-seg">${b.direct.length} direta${b.direct.length!==1?'s':''} · ${b.incentive.length} incentivo</div></div></div><div class="sp-card-body">${rows}</div><div class="sp-stat"><span>Público est.: <strong>${pub.toLocaleString('pt-BR')}</strong></span><span>Aulas: <strong>${all.length}</strong></span></div></div>`;
+      return`<div class="sp-card"><div class="sp-card-head"><div><div class="sp-card-name" style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:7px;background:var(--primary-lt);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${initials}</div>${b.name}</div><div class="sp-card-seg">${b.direct.length} direta${b.direct.length!==1?'s':''} · ${b.incentive.length} incentivo</div></div></div><div class="sp-card-body">${rows}</div><div class="sp-stat"><span>Aulas: <strong>${all.length}</strong></span></div></div>`;
     }).join('');
     grid.innerHTML=`<div class="sp-grid">${brandCards}</div>${openHtml}`;
   } else {
@@ -867,10 +861,10 @@ function renderSponsors(){
     filtered.filter(c=>c.brand).forEach(c=>{if(!brands[c.brand])brands[c.brand]={name:c.brand,direct:[],incentive:[]};brands[c.brand][c.sp]&&brands[c.brand][c.sp].push(c);});
     const brandCards=Object.values(brands).sort((a,b)=>a.name.localeCompare(b.name)).map(b=>{
       const all=[...( b.direct||[]),...(b.incentive||[])].sort((x,y)=>x.week-y.week||x.day-y.day);
-      const pub=all.reduce((s,c)=>s+c.aud,0);
+      
       const rows=all.map(c=>{const _ws=WEEKS_META[c.week].start;const date=new Date(_ws[0],_ws[1],_ws[2]+c.day);return`<div class="sp-class-row"><div class="sp-class-left"><div class="sp-class-name">${c.name}</div><div class="sp-class-meta">${DAYFULL[c.day]} ${date.getDate()}/${String(date.getMonth()+1).padStart(2,'0')} · ${c.time} · ${c.local}</div></div><span class="badge ${c.sp==='direct'?'b-dir':'b-inc'}">${c.sp==='direct'?'Direta':'Incentivo'}</span></div>`;}).join('');
       const initials=b.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-      return`<div class="sp-card"><div class="sp-card-head"><div><div class="sp-card-name" style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:7px;background:var(--primary-lt);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${initials}</div>${b.name}</div><div class="sp-card-seg">${(b.direct||[]).length} direta${(b.direct||[]).length!==1?'s':''} · ${(b.incentive||[]).length} incentivo</div></div></div><div class="sp-card-body">${rows}</div><div class="sp-stat"><span>Público: <strong>${pub.toLocaleString('pt-BR')}</strong></span><span>Aulas: <strong>${all.length}</strong></span></div></div>`;
+      return`<div class="sp-card"><div class="sp-card-head"><div><div class="sp-card-name" style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:7px;background:var(--primary-lt);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${initials}</div>${b.name}</div><div class="sp-card-seg">${(b.direct||[]).length} direta${(b.direct||[]).length!==1?'s':''} · ${(b.incentive||[]).length} incentivo</div></div></div><div class="sp-card-body">${rows}</div><div class="sp-stat"><span>Aulas: <strong>${all.length}</strong></span></div></div>`;
     }).join('');
     grid.innerHTML=`<div class="sp-grid">${brandCards}</div>`;
   }
@@ -972,7 +966,7 @@ function rebuildCharts(){
   const incD=[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='incentive').length);
   const dirD=[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='direct').length);
   const D=id=>{if(charts[id]){charts[id].destroy();delete charts[id];}};
-  ['ch1','ch2','ch3','ch4','ch5'].forEach(D);
+  ['ch1','ch2','ch3','ch4'].forEach(D);
   charts.ch1=new Chart(document.getElementById('ch1'),{type:'bar',data:{labels:wl,datasets:[{label:'Patrocinada',data:dirD,backgroundColor:'#1D9E75',borderRadius:4},{label:'Via incentivo',data:incD,backgroundColor:'#b87010',borderRadius:4},{label:'Sem patrocínio',data:openD,backgroundColor:'#ed1847',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'rgba(128,128,128,.1)'},ticks:{stepSize:10}}}}});
   charts.ch2=new Chart(document.getElementById('ch2'),{type:'line',data:{labels:wl,datasets:[{label:'Sem patrocínio',data:openD,borderColor:'#ed1847',backgroundColor:'rgba(237,24,71,.08)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:'#ed1847'},{label:'Meta',data:[15,15],borderColor:'#1860b8',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(128,128,128,.1)'},min:0}}}});
   const cats=Object.keys(CATCOLORS);
@@ -983,18 +977,18 @@ function rebuildCharts(){
   const l4=document.getElementById('ch4leg');l4.innerHTML='';
   cats.forEach(c=>{l4.innerHTML+=`<div class="cli"><div class="clsq" style="background:${CATCOLORS[c]}"></div>${CATLABELS[c]}</div>`;});
   charts.ch4=new Chart(document.getElementById('ch4'),{type:'bar',data:{labels:wl,datasets:cats.map(c=>({label:CATLABELS[c],data:[0,1].map(w=>classes.filter(cl=>cl.week===w&&cl.cat===c&&cl.sp==='open').length),backgroundColor:CATCOLORS[c],borderRadius:3}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(128,128,128,.1)'},ticks:{stepSize:2}}}}});
-  charts.ch5=new Chart(document.getElementById('ch5'),{type:'line',data:{labels:wl,datasets:[{label:'Patrocinada',data:[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='direct').reduce((s,c)=>s+c.aud,0)),borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,.1)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#1D9E75'},{label:'Via incentivo',data:[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='incentive').reduce((s,c)=>s+c.aud,0)),borderColor:'#b87010',backgroundColor:'rgba(184,112,16,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#b87010'},{label:'Sem patrocínio',data:[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='open').reduce((s,c)=>s+c.aud,0)),borderColor:'#ed1847',backgroundColor:'rgba(237,24,71,.07)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#ed1847'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(128,128,128,.1)'},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}}}}});
+  // ch5 removed
   const totalW=[0,1].map(w=>classes.filter(c=>c.week===w).length);
   const maxOI=openD.indexOf(Math.max(...openD));
   document.getElementById('ins1').textContent=`${WEEKS_META[maxOI].label} (${WEEKS_META[maxOI].range}) tem ${openD[maxOI]} aulas sem patrocínio — maior janela do período.`;
   const cfO=[0,1,2,3].map(w=>classes.filter(c=>c.week===w&&c.cat==='crossfit'&&c.sp==='open').length);
-  document.getElementById('ins2').textContent=`CrossFit tem ${Math.max(...cfO)} slots abertos sem patrocínio. Alto público, baixa cobertura.`;
+  document.getElementById('ins2').textContent=`CrossFit tem ${Math.max(...cfO)} slots CrossFit abertos sem patrocínio. Prioridade para ativação.\`;
   const bestI=dirD.map((d,i)=>totalW[i]?Math.round(d/totalW[i]*100):0).reduce((bi,v,i,a)=>v>a[bi]?i:bi,0);
   document.getElementById('ins3').textContent=`${WEEKS_META[bestI].label} tem maior cobertura de patrocínio direto (${dirD[bestI]} de ${totalW[bestI]} aulas).`;
   document.getElementById('ins4').textContent=`Yoga tem ${classes.filter(c=>c.cat==='yoga'&&c.sp==='open').length} slots abertos — perfil ideal para Vivo e Danone YoPRO.`;
   const covPct=classes.length?Math.round(classes.filter(c=>c.sp!=='open').length/classes.length*100):0;
   document.getElementById('ins6').textContent=`${covPct}% das aulas têm algum patrocínio. Meta: ≥85%. ${covPct<85?'Ampliar parcerias.':'Acima da meta.'}`;
-  document.getElementById('brandRec').innerHTML=[{brand:'Vivo',seg:'Telecom',cats:['yoga','meditacao'],weeks:'2,3,4',type:'Naming'},{brand:'Amstel Ultra',seg:'Bebidas',cats:['crossfit','hiit'],weeks:'1,2',type:'Pós-treino'},{brand:'Danone YoPRO',seg:'Nutrição',cats:['musculacao','pilates'],weeks:'1,3',type:'Sampling'},{brand:'Under Armour',seg:'Moda',cats:['crossfit','danca','hiit'],weeks:'3,4',type:'Kit instrutores'},{brand:'Santander',seg:'Financeiro',cats:['yoga','danca'],weeks:'2,4',type:'Branding'},{brand:'Bradesco Saúde',seg:'Saúde',cats:['meditacao','pilates'],weeks:'1,2,3',type:'Lei Incentivo'}].map(r=>{const slots=r.cats.reduce((s,c)=>s+classes.filter(cl=>cl.cat===c&&cl.sp==='open').length,0);const pub=r.cats.reduce((s,c)=>s+classes.filter(cl=>cl.cat===c&&cl.sp==='open').reduce((ss,cl)=>ss+cl.aud,0),0);return`<tr><td style="font-weight:500">${r.brand}</td><td>${r.seg}</td><td>${r.cats.map(c=>`<span class="b-cat" style="margin-right:3px">${CATLABELS[c]}</span>`).join('')}</td><td>Sem. ${r.weeks}</td><td><span class="badge b-open">${slots} slots</span></td><td>—</td><td>${r.type}</td></tr>`;}).join('');
+  document.getElementById('brandRec').innerHTML=[{brand:'Vivo',seg:'Telecom',cats:['yoga','meditacao'],weeks:'2,3,4',type:'Naming'},{brand:'Amstel Ultra',seg:'Bebidas',cats:['crossfit','hiit'],weeks:'1,2',type:'Pós-treino'},{brand:'Danone YoPRO',seg:'Nutrição',cats:['musculacao','pilates'],weeks:'1,3',type:'Sampling'},{brand:'Under Armour',seg:'Moda',cats:['crossfit','danca','hiit'],weeks:'3,4',type:'Kit instrutores'},{brand:'Santander',seg:'Financeiro',cats:['yoga','danca'],weeks:'2,4',type:'Branding'},{brand:'Bradesco Saúde',seg:'Saúde',cats:['meditacao','pilates'],weeks:'1,2,3',type:'Lei Incentivo'}].map(r=>{const slots=r.cats.reduce((s,c)=>s+classes.filter(cl=>cl.cat===c&&cl.sp==='open').length,0);return`<tr><td style="font-weight:500">${r.brand}</td><td>${r.seg}</td><td>${r.cats.map(c=>`<span class="b-cat" style="margin-right:3px">${CATLABELS[c]}</span>`).join('')}</td><td>Sem. ${r.weeks}</td><td><span class="badge b-open">${slots} slots</span></td><td>—</td><td>${r.type}</td></tr>`;}).join('');
 }
 
 
