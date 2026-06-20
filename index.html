@@ -499,8 +499,7 @@ tr:hover td{background:var(--surf2)}
     <div class="field"><label>Instrutor(a)</label><input type="text" id="fInstrutor" placeholder="Nome do instrutor"></div>
     <div class="row2">
       <div class="field"><label>Horário</label><input type="time" id="fTime"></div>
-      <div class="field"><label>Público estimado</label><input type="number" id="fAud" min="10" max="500"></div>
-    </div>
+      </div>
     <div class="field"><label>Local</label><select id="fLocal"><option>Estação Ipanema Norte</option><option>Estação Ipanema Sul</option><option>Estação Leblon</option><option>Estação Copacabana</option><option>Estação Botafogo</option><option>Rio Academia</option></select></div>
     <div class="row2">
       <div class="field"><label>Patrocínio</label><select id="fSp"><option value="open">Sem patrocínio</option><option value="incentive">Via incentivo</option><option value="direct">Patrocinada direta</option></select></div>
@@ -846,7 +845,7 @@ function showToast(msg){
   const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;
   t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);
 }
-function updateAll(){updateKPIs();renderGrid();renderOppTable();}
+function updateAll(){updateKPIs();renderGrid();renderOppTable();updateInsights();}
 
 document.getElementById('catF').addEventListener('click',e=>{const b=e.target.closest('.fbtn');if(!b)return;catFilter=b.dataset.v;document.querySelectorAll('#catF .fbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderGrid();renderOppTable();});
 document.getElementById('spF').addEventListener('click',e=>{const b=e.target.closest('.fbtn');if(!b)return;spFilter=b.dataset.v;document.querySelectorAll('#spF .fbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderGrid();});
@@ -900,6 +899,142 @@ function renderExportPreview(){
     <td><span class="badge ${r['Patrocínio']==='Patrocinada direta'?'b-dir':r['Patrocínio']==='Via incentivo'?'b-inc':'b-open'}">${r['Patrocínio']}</span></td>
     <td>${r['Marca']||'—'}</td>
   </tr>`).join('')+(rows.length>50?`<tr><td colspan="10" style="text-align:center;color:var(--txf);padding:.75rem">… e mais ${rows.length-50} aulas</td></tr>`:'');
+}
+
+/* ── INSIGHTS & BRAND REC ── */
+function updateInsights(){
+  const wl=WEEKS_META.map(w=>w.label);
+  const openD=[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='open').length);
+  const incD=[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='incentive').length);
+  const dirD=[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='direct').length);
+    const totalW=[0,1].map(w=>classes.filter(c=>c.week===w).length);
+  const maxOI=openD.indexOf(Math.max(...openD));
+  document.getElementById('ins1').textContent=`${WEEKS_META[maxOI].label} (${WEEKS_META[maxOI].range}) tem ${openD[maxOI]} aulas sem patrocínio — maior janela do período.`;
+  const cfO=[0,1,2,3].map(w=>classes.filter(c=>c.week===w&&c.cat==='crossfit'&&c.sp==='open').length);
+  document.getElementById('ins2').textContent=`CrossFit tem ${Math.max(...cfO)} slots CrossFit abertos sem patrocínio. Prioridade para ativação.`;
+  const bestI=dirD.map((d,i)=>totalW[i]?Math.round(d/totalW[i]*100):0).reduce((bi,v,i,a)=>v>a[bi]?i:bi,0);
+  document.getElementById('ins3').textContent=`${WEEKS_META[bestI].label} tem maior cobertura de patrocínio direto (${dirD[bestI]} de ${totalW[bestI]} aulas).`;
+  document.getElementById('ins4').textContent=`Yoga tem ${classes.filter(c=>c.cat==='yoga'&&c.sp==='open').length} slots abertos — perfil ideal para Vivo e Danone YoPRO.`;
+  const covPct=classes.length?Math.round(classes.filter(c=>c.sp!=='open').length/classes.length*100):0;
+  document.getElementById('ins6').textContent=`${covPct}% das aulas têm algum patrocínio. Meta: ≥85%. ${covPct<85?'Ampliar parcerias.':'Acima da meta.'}`;
+  document.getElementById('brandRec').innerHTML=[{brand:'Vivo',seg:'Telecom',cats:['yoga','meditacao'],weeks:'2,3,4',type:'Naming'},{brand:'Amstel Ultra',seg:'Bebidas',cats:['crossfit','hiit'],weeks:'1,2',type:'Pós-treino'},{brand:'Danone YoPRO',seg:'Nutrição',cats:['musculacao','pilates'],weeks:'1,3',type:'Sampling'},{brand:'Under Armour',seg:'Moda',cats:['crossfit','danca','hiit'],weeks:'3,4',type:'Kit instrutores'},{brand:'Santander',seg:'Financeiro',cats:['yoga','danca'],weeks:'2,4',type:'Branding'},{brand:'Bradesco Saúde',seg:'Saúde',cats:['meditacao','pilates'],weeks:'1,2,3',type:'Lei Incentivo'}].map(r=>{const slots=r.cats.reduce((s,c)=>s+classes.filter(cl=>cl.cat===c&&cl.sp==='open').length,0);return`<tr><td style="font-weight:500">${r.brand}</td><td>${r.seg}</td><td>${r.cats.map(c=>`<span class="b-cat" style="margin-right:3px">${CATLABELS[c]}</span>`).join('')}</td><td>Sem. ${r.weeks}</td><td><span class="badge b-open">${slots} slots</span></td><td>—</td><td>${r.type}</td></tr>`;}).join('');
+}
+
+
+/* ── LOCAL PAGE ── */
+let localWeek=0, profWeek=0;
+
+function buildLocalWeekTabs(){
+  ['localWeekTabs','profWeekTabs'].forEach(id=>{
+    const c=document.getElementById(id);if(!c)return;c.innerHTML='';
+    const isProf=id==='profWeekTabs';
+    WEEKS_META.forEach((w,i)=>{
+      const b=document.createElement('button');
+      b.className='wtab'+(i===0?' active':'');
+      b.textContent=w.label+' · '+w.range;
+      b.onclick=()=>{
+        if(isProf) profWeek=i; else localWeek=i;
+        c.querySelectorAll('.wtab').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        if(isProf) renderProfPage(); else renderLocalPage();
+      };
+      c.appendChild(b);
+    });
+  });
+}
+
+function renderCard(c){
+  const CAT_COLOR={yoga:'#1D9E75',musculacao:'#378ADD',crossfit:'#D85A30',danca:'#D4537E',meditacao:'#7F77DD',pilates:'#BA7517',hiit:'#E24B4A',volei:'#00897B',surf:'#0277BD'};
+  const CAT_BG={yoga:'#e1f5ee',musculacao:'#e6f1fb',crossfit:'#faece7',danca:'#fbeaf0',meditacao:'#eeedfe',pilates:'#faeeda',hiit:'#fcebeb',volei:'#e0f2f1',surf:'#e1f0f8'};
+  const SP_PILL={direct:`<span style="font-size:9px;font-weight:600;padding:1px 6px;border-radius:3px;background:rgba(29,158,117,.15);color:#0F6E56">Patrocinada</span>`,incentive:`<span style="font-size:9px;font-weight:600;padding:1px 6px;border-radius:3px;background:rgba(184,112,16,.15);color:#7a4c00">Incentivada</span>`,open:`<span style="font-size:9px;font-weight:600;padding:1px 6px;border-radius:3px;background:rgba(237,24,71,.12);color:#9c0f2e">Mude Mob.</span>`};
+  const bg=CAT_BG[c.cat]||'#f5f4f0';
+  const col=CAT_COLOR[c.cat]||'#555';
+  const DAYS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  const ws=WEEKS_META[c.week].start;
+  const dt=new Date(ws[0],ws[1],ws[2]+c.day);
+  const dd=String(dt.getDate()).padStart(2,'0');
+  const mm=String(dt.getMonth()+1).padStart(2,'0');
+  return `<div style="background:${bg};border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:10px;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.04em">${CATLABELS[c.cat]||c.name}</span>
+      ${SP_PILL[c.sp]||''}
+    </div>
+    <div style="font-size:13px;font-weight:600;color:var(--tx)">${c.name}</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:${col}"><i class="ti ti-map-pin" style="font-size:12px"></i>${c.local}</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:2px">
+      <span style="font-size:11px;color:var(--txm);display:flex;align-items:center;gap:4px"><i class="ti ti-clock" style="font-size:11px"></i>${DAYS[c.day]} ${dd}/${mm} · ${c.time}</span>
+      ${c.instrutor?`<span style="font-size:11px;color:var(--txm);display:flex;align-items:center;gap:4px"><i class="ti ti-user" style="font-size:11px"></i>${c.instrutor}</span>`:''}
+    </div>
+    ${c.brand?`<div style="font-size:10px;color:var(--txm);margin-top:1px">${c.brand}</div>`:''}
+  </div>`;
+}
+
+function renderLocalPage(){
+  const sel=document.getElementById('localSelect').value;
+  const filtered=classes.filter(c=>c.week===localWeek&&(sel==='all'||c.local===sel))
+    .sort((a,b)=>a.day-b.day||a.time.localeCompare(b.time));
+  const grid=document.getElementById('localGrid');
+  if(!filtered.length){grid.innerHTML='<div style="text-align:center;padding:3rem;color:var(--txf);font-size:13px">Nenhuma aula encontrada para este local.</div>';return;}
+
+  if(sel==='all'){
+    // Group by local
+    const byLocal={};
+    filtered.forEach(c=>{if(!byLocal[c.local])byLocal[c.local]=[];byLocal[c.local].push(c);});
+    grid.innerHTML=Object.entries(byLocal).sort(([a],[b])=>a.localeCompare(b)).map(([loc,aulas])=>`
+      <div style="margin-bottom:1.5rem">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:.5px solid var(--bdr)">
+          <i class="ti ti-map-pin" style="font-size:16px;color:var(--primary)" aria-hidden="true"></i>
+          <span style="font-size:14px;font-weight:600">${loc}</span>
+          <span style="font-size:11px;color:var(--txm);background:var(--surf2);padding:2px 8px;border-radius:10px">${aulas.length} aula${aulas.length!==1?'s':''}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px">
+          ${aulas.map(c=>renderCard(c)).join('')}
+        </div>
+      </div>`).join('');
+  } else {
+    grid.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;padding:.75rem 1rem;background:var(--surf);border:.5px solid var(--bdr);border-radius:var(--rl)">
+        <i class="ti ti-map-pin" style="font-size:18px;color:var(--primary)" aria-hidden="true"></i>
+        <div><div style="font-size:15px;font-weight:600">${sel}</div><div style="font-size:11px;color:var(--txm)">${filtered.length} aula${filtered.length!==1?'s':''} neste local</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px">
+        ${filtered.map(c=>renderCard(c)).join('')}
+      </div>`;
+  }
+}
+
+function renderProfPage(){
+  const sel=document.getElementById('profSelect').value;
+  const filtered=classes.filter(c=>c.week===profWeek&&(sel==='all'||c.instrutor===sel))
+    .sort((a,b)=>a.day-b.day||a.time.localeCompare(b.time));
+  const grid=document.getElementById('profGrid');
+  if(!filtered.length){grid.innerHTML='<div style="text-align:center;padding:3rem;color:var(--txf);font-size:13px">Nenhuma aula encontrada para este professor.</div>';return;}
+
+  if(sel==='all'){
+    const byProf={};
+    filtered.filter(c=>c.instrutor).forEach(c=>{if(!byProf[c.instrutor])byProf[c.instrutor]=[];byProf[c.instrutor].push(c);});
+    grid.innerHTML=Object.entries(byProf).sort(([a],[b])=>a.localeCompare(b)).map(([prof,aulas])=>`
+      <div style="margin-bottom:1.5rem">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:.5px solid var(--bdr)">
+          <div style="width:34px;height:34px;border-radius:50%;background:var(--primary-lt);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">${prof.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}</div>
+          <div><div style="font-size:14px;font-weight:600">${prof}</div><div style="font-size:11px;color:var(--txm)">${aulas.length} aula${aulas.length!==1?'s':''}</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px">
+          ${aulas.map(c=>renderCard(c)).join('')}
+        </div>
+      </div>`).join('');
+  } else {
+    const initials=sel.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    grid.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;padding:.75rem 1rem;background:var(--surf);border:.5px solid var(--bdr);border-radius:var(--rl)">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0">${initials}</div>
+        <div><div style="font-size:15px;font-weight:600">${sel}</div><div style="font-size:11px;color:var(--txm)">${filtered.length} aula${filtered.length!==1?'s':''} nesta semana</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px">
+        ${filtered.map(c=>renderCard(c)).join('')}
+      </div>`;
+  }
+
 }
 
 async function initApp(){
