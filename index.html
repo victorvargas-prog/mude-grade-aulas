@@ -290,11 +290,15 @@ tr:hover td{background:var(--surf2)}
         <span class="flabel">Modalidade:</span>
         <button class="fbtn active" data-v="all">Todas</button>
         <button class="fbtn" data-v="yoga">Yoga</button>
-        <button class="fbtn" data-v="hiit">HIIT / Treino</button>
-        <button class="fbtn" data-v="pilates">Pilates</button>
+        <button class="fbtn" data-v="hiit_beach">Beach Workout</button>
+        <button class="fbtn" data-v="hiit_hiit">HIIT</button>
+        <button class="fbtn" data-v="hiit_boxe">Boxe</button>
+        <button class="fbtn" data-v="hiit_fight">Fight Training</button>
+        <button class="fbtn" data-v="hiit_fut">Fut-Funcional</button>
+        <button class="fbtn" data-v="pilates">Mat Pilates</button>
         <button class="fbtn" data-v="crossfit">CrossTraining</button>
         <button class="fbtn" data-v="danca">Dança</button>
-        <button class="fbtn" data-v="volei">Vôlei</button>
+        <button class="fbtn" data-v="volei">Vôlei de Praia</button>
         <button class="fbtn" data-v="surf">Surf</button>
       </div>
     </div>
@@ -551,7 +555,7 @@ const WEEKS_META=[{label:'Sem. 1',range:'16–22 jun',start:[2026,5,16]},{label:
 const DAYNAMES=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 const DAYFULL=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
 const CATCOLORS={yoga:'#1D9E75',musculacao:'#378ADD',crossfit:'#D85A30',danca:'#D4537E',meditacao:'#7F77DD',pilates:'#BA7517',hiit:'#E24B4A',volei:'#00897B',surf:'#0277BD'};
-const CATLABELS={yoga:'Yoga',musculacao:'Musculação',crossfit:'CrossFit',danca:'Dança',meditacao:'Meditação',pilates:'Pilates',hiit:'HIIT',volei:'Vôlei de Praia',surf:'Surf'};
+const CATLABELS={yoga:'Yoga',musculacao:'Musculação',crossfit:'CrossTraining',danca:'Dança',meditacao:'Meditação',pilates:'Mat Pilates',hiit:'HIIT',volei:'Vôlei de Praia',surf:'Surf'};
 const BRANDMAP={yoga:['Vivo','Elo','Riachuelo'],musculacao:['Vivo','Riachuelo'],crossfit:['Vivo'],danca:['Vivo','Bacio'],meditacao:['Riachuelo'],pilates:['Vivo','Premier Pet'],hiit:['Elo','Riachuelo','Porto'],volei:['Mude Mobiliários'],surf:['Mude Mobiliários']};
 const SPONSOR_META={"Riachuelo": {"tipo": "incentive", "aulas_sem": 9, "inicio": "22/06/2026", "venc": "31/12/2026", "cor": "#5a5a5a"}, "Riachuelo ICMS": {"tipo": "incentive", "aulas_sem": 2, "inicio": "25/06/2026", "venc": "31/12/2026", "cor": "#444444"}, "Porto": {"tipo": "incentive", "aulas_sem": 3, "inicio": "06/07/2026", "venc": "31/12/2026", "cor": "#b89800"}, "Premier Pet": {"tipo": "incentive", "aulas_sem": 2, "inicio": "04/07/2026", "venc": "18/08/2026", "cor": "#c0362a"}, "Vivo": {"tipo": "direct", "aulas_sem": 6, "inicio": "23/02/2026", "venc": "31/12/2026", "cor": "#c2185b"}, "Elo": {"tipo": "direct", "aulas_sem": 3, "inicio": "22/06/2026", "venc": "29/12/2026", "cor": "#7cb800"}, "Nestlé": {"tipo": "direct", "aulas_sem": 2, "inicio": "22/06/2026", "venc": "27/06/2026", "cor": "#90a4ae"}, "Bacio": {"tipo": "direct", "aulas_sem": 1, "inicio": "22/06/2026", "venc": "25/06/2026", "cor": "#1565c0"}, "Mude Mobiliários": {"tipo": "open", "aulas_sem": 9, "inicio": "22/06/2026", "venc": "31/12/2026", "cor": "#ef9a9a"}};
 
@@ -622,9 +626,16 @@ function renderGrid(){
   const DNAMES = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 
   // Filter classes for current week
+  const hiitSubMap = {
+    'hiit_beach':'Beach Workout','hiit_hiit':'HIIT',
+    'hiit_boxe':'Boxe','hiit_fight':'Fight Training','hiit_fut':'Fut-Funcional'
+  };
   const wClasses = classes.filter(c =>
     c.week === curWeek &&
-    (catFilter==='all' || c.cat===catFilter || (catFilter==='hiit' && ['hiit','crossfit','surf'].includes(c.cat))) &&
+    (catFilter==='all'
+      || c.cat===catFilter
+      || (hiitSubMap[catFilter] && c.name===hiitSubMap[catFilter])
+    ) &&
     (spFilter==='all' || c.sp===spFilter)
   );
 
@@ -811,7 +822,7 @@ function showToast(msg){
 }
 function updateAll(){updateKPIs();renderGrid();renderOppTable();}
 
-document.getElementById('catF').addEventListener('click',e=>{const b=e.target.closest('.fbtn');if(!b)return;catFilter=b.dataset.v;document.querySelectorAll('#catF .fbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderGrid();});
+document.getElementById('catF').addEventListener('click',e=>{const b=e.target.closest('.fbtn');if(!b)return;catFilter=b.dataset.v;document.querySelectorAll('#catF .fbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderGrid();renderOppTable();});
 document.getElementById('spF').addEventListener('click',e=>{const b=e.target.closest('.fbtn');if(!b)return;spFilter=b.dataset.v;document.querySelectorAll('#spF .fbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderGrid();});
 
 /* ── EXCEL EXPORT ── */
