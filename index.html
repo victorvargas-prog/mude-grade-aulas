@@ -25,7 +25,7 @@ html[data-theme="dark"]{
   --tx:#efede7;--txm:#999890;--txf:#57574f;
   --primary-lt:#3a0510;--glt:#0a2e1f;--alt:#2a1d06;--rlt:#2a0f0d;--blt:#0a1e34;
 }
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;min-height:100vh;transition:background .2s,color .2s}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-size:15px;line-height:1.5;min-height:100vh;transition:background .2s,color .2s}
 
 /* LOGIN */
 #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1.5rem}
@@ -49,7 +49,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-si
 /* NAV */
 nav{background:var(--surf);border-bottom:.5px solid var(--bdr);padding:0 1.5rem;display:flex;align-items:center;gap:0;position:sticky;top:0;z-index:100}
 .logo-img{height:28px;width:auto;margin-right:1.5rem;display:block}
-.nav-tab{height:48px;padding:0 .9rem;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--txm);cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s}
+.nav-tab{height:52px;padding:0 1rem;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:500;color:var(--txm);cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s}
 .nav-tab:hover{color:var(--tx)}
 .nav-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
 .nav-tab i{font-size:14px}
@@ -271,7 +271,7 @@ tr:hover td{background:var(--surf2)}
   <div class="hero">
     <div class="hero-eye">Grade de aulas · Mude Rio de Janeiro</div>
     <div class="hero-title">Junho 2026</div>
-    <div class="hero-sub">Modalidade, horário, local e patrocinador por dia da semana</div>
+    <div class="hero-sub">Modalidade, horário, local e patrocinador por dia da semana · Scroll horizontal para ver todos os dias</div>
     <div class="hero-kpis">
       <div class="kpi"><div class="kpi-v" id="kpi-total">—</div><div class="kpi-l">Total de aulas</div></div>
       <div class="kpi"><div class="kpi-v" id="kpi-open">—</div><div class="kpi-l">Mude Mobiliários</div></div>
@@ -684,14 +684,14 @@ function renderGrid(){
 
   // Build header row: Horário + 7 day columns
   const headRow = document.createElement('tr');
-  headRow.innerHTML = `<th style="width:70px;padding:8px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txf);border-bottom:.5px solid var(--bdr);background:var(--surf);position:sticky;left:0;z-index:2">Horário</th>` +
+  headRow.innerHTML = `<th style="width:90px;padding:10px 12px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txf);border-bottom:.5px solid var(--bdr);background:var(--surf);position:sticky;left:0;z-index:2">Horário</th>` +
     Array.from({length:7},(_,d)=>{
       const dt = new Date(wStart[0],wStart[1],wStart[2]+d);
       const isTod = dt.toDateString()===today.toDateString();
       const dd = dt.getDate();
       const mm = String(dt.getMonth()+1).padStart(2,'0');
-      return `<th style="min-width:130px;padding:8px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;border-bottom:.5px solid var(--bdr);border-left:.5px solid var(--bdr);background:${isTod?'var(--primary)':'var(--surf)'};color:${isTod?'#fff':'var(--txm)'}">
-        <div>${DNAMES[d]}</div><div style="font-size:16px;font-weight:600;letter-spacing:-.02em;color:${isTod?'#fff':'var(--tx)'}">${dd}/${mm}</div>
+      return `<th style="min-width:200px;padding:10px 12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;border-bottom:.5px solid var(--bdr);border-left:.5px solid var(--bdr);background:${isTod?'var(--primary)':'var(--surf)'};color:${isTod?'#fff':'var(--txm)'}">
+        <div>${DNAMES[d]}</div><div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:${isTod?'#fff':'var(--tx)'}">${dd}/${mm}</div>
         ${isTod?'<div style="font-size:9px;opacity:.75;margin-top:2px">hoje</div>':''}
       </th>`;
     }).join('');
@@ -700,9 +700,9 @@ function renderGrid(){
 
   // Build body: one row per time slot
   const SP_PILL={
-    direct:`<span style="display:inline-flex;align-items:center;gap:2px;font-size:8px;font-weight:600;padding:1px 5px;border-radius:3px;background:rgba(29,158,117,.15);color:#0F6E56"><i class="ti ti-check" style="font-size:8px"></i>`,
-    incentive:`<span style="display:inline-flex;align-items:center;gap:2px;font-size:8px;font-weight:600;padding:1px 5px;border-radius:3px;background:rgba(184,112,16,.15);color:#7a4c00"><i class="ti ti-discount" style="font-size:8px"></i>`,
-    open:`<span style="display:inline-flex;align-items:center;gap:2px;font-size:8px;font-weight:600;padding:1px 5px;border-radius:3px;background:rgba(237,24,71,.12);color:#9c0f2e"><i class="ti ti-circle-dotted" style="font-size:8px"></i>`
+    direct:`<span style="display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:rgba(29,158,117,.15);color:#0F6E56"><i class="ti ti-check" style="font-size:8px"></i>`,
+    incentive:`<span style="display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:rgba(184,112,16,.15);color:#7a4c00"><i class="ti ti-discount" style="font-size:8px"></i>`,
+    open:`<span style="display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:rgba(237,24,71,.12);color:#9c0f2e"><i class="ti ti-circle-dotted" style="font-size:8px"></i>`
   };
   const CAT_COLOR={yoga:'#1D9E75',musculacao:'#378ADD',crossfit:'#D85A30',danca:'#D4537E',meditacao:'#7F77DD',pilates:'#BA7517',hiit:'#E24B4A',volei:'#00897B',surf:'#0277BD'};
   const CAT_BG={yoga:'#e1f5ee',musculacao:'#e6f1fb',crossfit:'#faece7',danca:'#fbeaf0',meditacao:'#eeedfe',pilates:'#faeeda',hiit:'#fcebeb',volei:'#e0f2f1',surf:'#e1f0f8'};
@@ -726,18 +726,18 @@ function renderGrid(){
     if(!times.length) return;
     // Section header
     const hRow = document.createElement('tr');
-    hRow.innerHTML=`<td colspan="8" style="background:var(--surf2);padding:6px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--txf);border-top:.5px solid var(--bdr);border-bottom:.5px solid var(--bdr)">${label}</td>`;
+    hRow.innerHTML=`<td colspan="8" style="background:var(--surf2);padding:10px 14px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--txf);border-top:.5px solid var(--bdr);border-bottom:.5px solid var(--bdr)">${label}</td>`;
     tbody.appendChild(hRow);
 
     times.forEach(time=>{
       const row = document.createElement('tr');
       row.style.borderBottom='.5px solid var(--bdr)';
-      let cells = `<td style="padding:8px 10px;font-size:12px;font-weight:600;color:var(--tx);background:var(--surf);position:sticky;left:0;z-index:1;border-right:.5px solid var(--bdr);vertical-align:top;white-space:nowrap">${time}</td>`;
+      let cells = `<td style="padding:10px 14px;font-size:15px;font-weight:600;color:var(--tx);background:var(--surf);position:sticky;left:0;z-index:1;border-right:.5px solid var(--bdr);vertical-align:top;white-space:nowrap;min-width:90px">${time}</td>`;
 
       for(let d=0;d<7;d++){
         const dayClasses = (grid[time]&&grid[time][d])||[];
         if(!dayClasses.length){
-          cells += `<td style="padding:6px;border-left:.5px solid var(--bdr);vertical-align:top;background:var(--surf)"></td>`;
+          cells += `<td style="padding:8px;border-left:.5px solid var(--bdr);vertical-align:top;background:var(--surf)"></td>`;
         } else {
           const cards = dayClasses.map(c=>{
             const bg = CAT_BG[c.cat]||'#f5f4f0';
@@ -746,16 +746,16 @@ function renderGrid(){
             const brandText = c.brand||'—';
             const pill = SP_PILL[c.sp]||SP_PILL.open;
             const loc = c.local;
-            const inst = c.instrutor ? `<div style="font-size:9px;color:${col};margin-top:1px;font-style:italic">${c.instrutor}</div>` : '';
-            return `<div style="background:${bg};border-radius:7px;padding:6px 8px;margin-bottom:4px;cursor:pointer;transition:opacity .1s" >
+            const inst = c.instrutor ? `<div style="font-size:11px;color:${col};margin-top:2px;font-style:italic">${c.instrutor}</div>` : '';
+            return `<div style="background:${bg};border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:opacity .1s" >
               <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">
-                <span style="font-size:9px;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.04em">${catLabel}</span>
+                <span style="font-size:11px;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.04em">${catLabel}</span>
               </div>
-              <div style="font-size:11px;font-weight:600;color:#1a1a18;line-height:1.3">${c.name}</div>
-              <div style="font-size:10px;font-weight:600;color:${col};margin-top:3px;display:flex;align-items:center;gap:3px"><i class="ti ti-map-pin" style="font-size:10px"></i>${loc}</div>
+              <div style="font-size:14px;font-weight:600;color:#1a1a18;line-height:1.3;margin-top:2px">${c.name}</div>
+              <div style="font-size:12px;font-weight:600;color:${col};margin-top:4px;display:flex;align-items:center;gap:3px"><i class="ti ti-map-pin" style="font-size:12px"></i>${loc}</div>
               ${inst}
               <div style="margin-top:4px">${pill}${brandText}</span></div>
-              ${c.apoio?`<div style="font-size:9px;color:#888;margin-top:2px;display:flex;align-items:center;gap:2px"><i class="ti ti-car" style="font-size:9px"></i>${c.apoio}</div>`:''}
+              ${c.apoio?`<div style="font-size:11px;color:var(--txm);margin-top:2px;display:flex;align-items:center;gap:3px"><i class="ti ti-car" style="font-size:11px"></i>${c.apoio}</div>`:''}
             </div>`;
           }).join('');
           cells += `<td style="padding:6px;border-left:.5px solid var(--bdr);vertical-align:top;background:var(--surf)">${cards}</td>`;
