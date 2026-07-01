@@ -889,8 +889,15 @@ async function fetchAndApplySheet(){
     console.error('Sheets API erro:', e.message);
     setSyncStatus('error');
     // Show error clearly to user
-    const errEl = document.getElementById('sheetsError');
-    if(errEl){ errEl.textContent = '⚠ Erro ao carregar planilha: '+e.message; errEl.style.display='block'; }
+    // Show error in all possible places
+    document.querySelectorAll('#sheetsError').forEach(el=>{
+      el.textContent = '⚠ Erro ao carregar planilha: '+e.message;
+      el.style.display='block';
+    });
+    // Also show as toast
+    const tm=document.getElementById('toastMsg');
+    const tb=document.getElementById('toast');
+    if(tm&&tb){tm.textContent='⚠ '+e.message;tb.style.background='#c0362a';tb.classList.add('show');setTimeout(()=>{tb.classList.remove('show');tb.style.background='';},6000);}
     return false;
   }
 }
