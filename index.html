@@ -742,20 +742,22 @@ function shRowToClass(row, idx){
   const dateRaw = get('data','date','Data');
   let dateObj = null;
   if(dateRaw){
-    // Try native Date first (handles ISO 8601: 2026-07-01)
-    const d = new Date(dateRaw);
-    if(!isNaN(d.getTime())){
-      dateObj = d;
+    const s = String(dateRaw).trim();
+    // ISO 8601: "2026-07-01" — parse explicitly to avoid timezone shifts
+    const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(isoMatch){
+      dateObj = new Date(Number(isoMatch[1]), Number(isoMatch[2])-1, Number(isoMatch[3]));
     } else {
-      // Try DD/MM/YYYY or DD-MM-YYYY
-      const parts = String(dateRaw).split(/[\/-]/);
-      if(parts.length===3){
-        const [a,b,c] = parts.map(Number);
-        if(a>31) dateObj = new Date(a,b-1,c); // YYYY/MM/DD
-        else     dateObj = new Date(c,b-1,a); // DD/MM/YYYY
+      // DD/MM/YYYY
+      const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if(dmyMatch){
+        dateObj = new Date(Number(dmyMatch[3]), Number(dmyMatch[2])-1, Number(dmyMatch[1]));
+      } else {
+        // Fallback: native Date (may have timezone issues)
+        const d = new Date(s);
+        if(!isNaN(d.getTime())) dateObj = new Date(d.getFullYear(), d.getMonth(), d.getDate());
       }
     }
-    // Validate result
     if(dateObj && isNaN(dateObj.getTime())) dateObj = null;
   }
 
@@ -820,7 +822,7 @@ function assignWeeks(rows){
   const weekIdx = {}; // monday key → index
   mondays.forEach((mon,i)=>weekIdx[mon.toISOString().slice(0,10)]=i);
 
-  const fmt = d => d.getDate()+'/'+(d.getMonth()+1);
+  const fmt = d => d.getDate()+'/'+(d.getMonth()+1); // Brazilian format d/m
 
   const newMeta = mondays.map((mon,i)=>{
     const sun = new Date(mon); sun.setDate(mon.getDate()+6);
@@ -962,11 +964,7 @@ function setPage(p){
 function buildWeekTabs(){
   const sel=document.getElementById('weekSelect');
   if(!sel)return;
-  sel.innerHTML=WEEKS_META.map((w,i)=>{
-    // Format: "Sem. 1 · 1/7 – 7/7"
-    const label=w.label+' · '+w.range;
-    return `<option value="${i}">${label}</option>`;
-  }).join('');
+  sel.innerHTML=WEEKS_META.map((w,i)=>`<option value="${i}">${w.label} · ${w.range}</option>`).join('');
   sel.value=String(curWeek);
 }
 function updateLocalDropdown(){
@@ -1020,12 +1018,14 @@ function renderGrid(){
   const headRow = document.createElement('tr');
   headRow.innerHTML = `<th style="width:90px;padding:10px 12px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txf);border-bottom:.5px solid var(--bdr);background:var(--surf);position:sticky;left:0;z-index:2">Horário</th>` +
     Array.from({length:7},(_,d)=>{
-      const dt = new Date(wStart[0],wStart[1],wStart[2]+d);
+      // Build date from week start (Monday) + d days
+      const dt = new Date(wStart[0], wStart[1], wStart[2] + d);
       const isTod = dt.toDateString()===today.toDateString();
       const dd = dt.getDate();
-      const mm = String(dt.getMonth()+1).padStart(2,'0');
-      return `<th style="min-width:200px;padding:10px 12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;border-bottom:.5px solid var(--bdr);border-left:.5px solid var(--bdr);background:${isTod?'var(--primary)':'var(--surf)'};color:${isTod?'#fff':'var(--txm)'}">
-        <div>${DNAMES[d]}</div><div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:${isTod?'#fff':'var(--tx)'}">${dd}/${mm}</div>
+      const mm = dt.getMonth()+1; // no leading zero
+      return `<th style="min-width:200px;padding:10px 12px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;border-bottom:.5px solid var(--bdr);border-left:.5px solid var(--bdr);background:${isTod?'var(--primary)':'var(--surf)'};color:${isTod?'#fff':'var(--txm)'}">
+        <div>${DNAMES[d]}</div>
+        <div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:${isTod?'#fff':'var(--tx)'}">${dd}/${mm}</div>
         ${isTod?'<div style="font-size:9px;opacity:.75;margin-top:2px">hoje</div>':''}
       </th>`;
     }).join('');
