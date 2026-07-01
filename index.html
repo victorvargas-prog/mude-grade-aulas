@@ -230,6 +230,24 @@ tr:hover td{background:var(--surf2)}
 .tt-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem}
 .tt-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txm)}
 .tt-leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* SEARCHABLE DROPDOWN */
+.sd-wrap{position:relative;min-width:170px}
+.sd-trigger{width:100%;padding:8px 32px 8px 12px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sd-trigger:focus,.sd-trigger.open{border-color:var(--primary)}
+.sd-trigger i{font-size:12px;color:var(--txm);flex-shrink:0;pointer-events:none}
+.sd-panel{display:none;position:absolute;top:calc(100% + 4px);left:0;min-width:100%;max-width:320px;background:var(--surf);border:.5px solid var(--bdr2);border-radius:var(--r);box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:500;overflow:hidden}
+.sd-panel.open{display:block}
+.sd-search{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:.5px solid var(--bdr)}
+.sd-search i{font-size:14px;color:var(--txf);flex-shrink:0}
+.sd-search input{flex:1;border:none;background:none;font-size:13px;font-family:'Inter',sans-serif;color:var(--tx);outline:none}
+.sd-search input::placeholder{color:var(--txf)}
+.sd-list{max-height:260px;overflow-y:auto}
+.sd-opt{padding:8px 12px;font-size:13px;cursor:pointer;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sd-opt:hover{background:var(--surf2)}
+.sd-opt.selected{background:var(--primary-lt);color:var(--primary);font-weight:500}
+.sd-opt.hidden{display:none}
+.sd-empty{padding:10px 12px;font-size:12px;color:var(--txf);text-align:center}
 </style>
 </head>
 <body>
@@ -286,98 +304,93 @@ tr:hover td{background:var(--surf2)}
 
     <!-- FILTER BAR (dropdowns) -->
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1.25rem;align-items:flex-end">
-      <div style="min-width:170px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Semana</label>
-        <select id="weekSelect" onchange="curWeek=parseInt(this.value);renderGrid();renderOppTable();" style="width:100%;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
-        </select>
-      </div>
-      <div style="min-width:190px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Modalidade</label>
-        <select id="catSelect" onchange="catFilter=this.value;renderGrid();renderOppTable();" style="width:100%;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
-          <option value="all">Todas as modalidades</option>
-          <option value="musculacao">Musculação</option>
-          <option value="yoga">Yoga</option>
-          <option value="funcional">Funcional</option>
-          <option value="hiit">HIIT</option>
-          <option value="danca">Dança</option>
-          <option value="corrida">Corrida</option>
-          <option value="boxe">Boxe</option>
-          <option value="muaythai">Muay Thai</option>
-          <option value="capoeira">Capoeira</option>
-          <option value="crossfit">CrossTraining</option>
-          <option value="pilates">Mat Pilates</option>
-          <option value="volei">Vôlei / Futevôlei</option>
-          <option value="gap">GAP</option>
-          <option value="outros">Outros</option>
-        </select>
-      </div>
-      <div style="min-width:170px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Patrocínio</label>
-        <select id="spSelect" onchange="spFilter=this.value;renderGrid();renderOppTable();" style="width:100%;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
-          <option value="all">Todos</option>
-          <option value="direct">Direto</option>
-          <option value="incentive">Incentivado</option>
-          <option value="open">Mude Mobiliários</option>
-        </select>
-      </div>
-      <div style="min-width:200px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Cidade</label>
-        <select id="gradeCidadeSelect" onchange="gradeCidadeFilter=this.value;gradeLocalFilter='all';updateLocalDropdown();renderGrid();renderOppTable();" style="width:100%;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
-          <option value="all">Todas as cidades</option>
-          <option value="Bonito">Bonito</option>
-          <option value="Brasília">Brasília</option>
-          <option value="Camaragibe">Camaragibe</option>
-          <option value="Crato">Crato</option>
-          <option value="Diadema">Diadema</option>
-          <option value="Floresta">Floresta</option>
-          <option value="Florianópolis">Florianópolis</option>
-          <option value="Fortaleza">Fortaleza</option>
-          <option value="Gravatá">Gravatá</option>
-          <option value="Ipojuca">Ipojuca</option>
-          <option value="Jaboatão dos Guararapes">Jaboatão dos Guararapes</option>
-          <option value="João Pessoa">João Pessoa</option>
-          <option value="Limoeiro">Limoeiro</option>
-          <option value="Maceió">Maceió</option>
-          <option value="Maricá">Maricá</option>
-          <option value="Navegantes">Navegantes</option>
-          <option value="Niterói">Niterói</option>
-          <option value="Paulista">Paulista</option>
-          <option value="Recife">Recife</option>
-          <option value="Riacho das Almas">Riacho das Almas</option>
-          <option value="Rio Verde">Rio Verde</option>
-          <option value="Rio de Janeiro">Rio de Janeiro</option>
-          <option value="Salvador">Salvador</option>
-          <option value="Surubim">Surubim</option>
-          <option value="São Bento do Una">São Bento do Una</option>
-          <option value="São José da Coroa Grande">São José da Coroa Grande</option>
-          <option value="São Paulo">São Paulo</option>
-          <option value="Valparaíso">Valparaíso</option>
-        </select>
-      </div>
-      <div style="min-width:200px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Local</label>
-        <select id="gradeLocalSelect" onchange="gradeLocalFilter=this.value;renderGrid();renderOppTable();" style="width:100%;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
-          <option value="all">Todos os locais</option>
-          <option value="Arpoador">Arpoador</option>
-          <option value="Arpoador - Posto 4">Arpoador - Posto 4</option>
-          <option value="Arpoador - Praça do Arpoador">Arpoador - Praça do Arpoador</option>
-          <option value="Barra da Tijuca - Posto 6">Barra da Tijuca - Posto 6</option>
-          <option value="Copacabana - Posto 4">Copacabana - Posto 4</option>
-          <option value="Engenhão">Engenhão</option>
-          <option value="Ipanema - Posto 10">Ipanema - Posto 10</option>
-          <option value="Lagoa">Lagoa</option>
-          <option value="Lagoa - Platô da Lagoa">Lagoa - Platô da Lagoa</option>
-          <option value="Leblon">Leblon</option>
-          <option value="Leblon - Praça Zózimo">Leblon - Praça Zózimo</option>
-          <option value="Madureira - Parque">Madureira - Parque</option>
-          <option value="Maravalley">Maravalley</option>
-          <option value="Parque de Madureira">Parque de Madureira</option>
-          <option value="Península">Península</option>
-          <option value="Recreio">Recreio</option>
-        </select>
-      </div>
-    </div>
 
+      <!-- Semana -->
+      <div class="sd-wrap" style="min-width:200px">
+        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Semana</label>
+        <div class="sd-trigger" id="sd-semana-trigger" onclick="sdToggle('semana')" tabindex="0">
+          <span id="sd-semana-label">Selecione a semana</span>
+          <i class="ti ti-chevron-down" aria-hidden="true"></i>
+        </div>
+        <div class="sd-panel" id="sd-semana-panel">
+          <div class="sd-search"><i class="ti ti-search" aria-hidden="true"></i><input type="text" placeholder="Buscar semana..." oninput="sdSearch('semana',this.value)"></div>
+          <div class="sd-list" id="sd-semana-list"></div>
+        </div>
+      </div>
+
+      <!-- Modalidade -->
+      <div class="sd-wrap" style="min-width:190px">
+        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Modalidade</label>
+        <div class="sd-trigger" id="sd-modalidade-trigger" onclick="sdToggle('modalidade')" tabindex="0">
+          <span id="sd-modalidade-label">Todas as modalidades</span>
+          <i class="ti ti-chevron-down" aria-hidden="true"></i>
+        </div>
+        <div class="sd-panel" id="sd-modalidade-panel">
+          <div class="sd-search"><i class="ti ti-search" aria-hidden="true"></i><input type="text" placeholder="Buscar modalidade..." oninput="sdSearch('modalidade',this.value)"></div>
+          <div class="sd-list" id="sd-modalidade-list">
+            <div class="sd-opt selected" data-value="all" onclick="sdSelect('modalidade','all','Todas as modalidades')">Todas as modalidades</div>
+            <div class="sd-opt" data-value="musculacao" onclick="sdSelect('modalidade','musculacao','Musculação')">Musculação</div>
+            <div class="sd-opt" data-value="yoga" onclick="sdSelect('modalidade','yoga','Yoga')">Yoga</div>
+            <div class="sd-opt" data-value="funcional" onclick="sdSelect('modalidade','funcional','Funcional')">Funcional</div>
+            <div class="sd-opt" data-value="hiit" onclick="sdSelect('modalidade','hiit','HIIT')">HIIT</div>
+            <div class="sd-opt" data-value="danca" onclick="sdSelect('modalidade','danca','Dança')">Dança</div>
+            <div class="sd-opt" data-value="corrida" onclick="sdSelect('modalidade','corrida','Corrida')">Corrida</div>
+            <div class="sd-opt" data-value="boxe" onclick="sdSelect('modalidade','boxe','Boxe')">Boxe</div>
+            <div class="sd-opt" data-value="muaythai" onclick="sdSelect('modalidade','muaythai','Muay Thai')">Muay Thai</div>
+            <div class="sd-opt" data-value="capoeira" onclick="sdSelect('modalidade','capoeira','Capoeira')">Capoeira</div>
+            <div class="sd-opt" data-value="crossfit" onclick="sdSelect('modalidade','crossfit','CrossTraining')">CrossTraining</div>
+            <div class="sd-opt" data-value="pilates" onclick="sdSelect('modalidade','pilates','Mat Pilates')">Mat Pilates</div>
+            <div class="sd-opt" data-value="volei" onclick="sdSelect('modalidade','volei','Vôlei / Futevôlei')">Vôlei / Futevôlei</div>
+            <div class="sd-opt" data-value="gap" onclick="sdSelect('modalidade','gap','GAP')">GAP</div>
+            <div class="sd-opt" data-value="outros" onclick="sdSelect('modalidade','outros','Outros')">Outros</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Patrocínio -->
+      <div class="sd-wrap" style="min-width:170px">
+        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Patrocínio</label>
+        <div class="sd-trigger" id="sd-patrocinio-trigger" onclick="sdToggle('patrocinio')" tabindex="0">
+          <span id="sd-patrocinio-label">Todos</span>
+          <i class="ti ti-chevron-down" aria-hidden="true"></i>
+        </div>
+        <div class="sd-panel" id="sd-patrocinio-panel">
+          <div class="sd-list" id="sd-patrocinio-list">
+            <div class="sd-opt selected" data-value="all"      onclick="sdSelect('patrocinio','all','Todos')">Todos</div>
+            <div class="sd-opt" data-value="direct"    onclick="sdSelect('patrocinio','direct','Patrocinada direta')">Patrocinada direta</div>
+            <div class="sd-opt" data-value="incentive" onclick="sdSelect('patrocinio','incentive','Via incentivo')">Via incentivo</div>
+            <div class="sd-opt" data-value="open"      onclick="sdSelect('patrocinio','open','Mude Mobiliários')">Mude Mobiliários</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cidade -->
+      <div class="sd-wrap" style="min-width:200px">
+        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Cidade</label>
+        <div class="sd-trigger" id="sd-cidade-trigger" onclick="sdToggle('cidade')" tabindex="0">
+          <span id="sd-cidade-label">Todas as cidades</span>
+          <i class="ti ti-chevron-down" aria-hidden="true"></i>
+        </div>
+        <div class="sd-panel" id="sd-cidade-panel">
+          <div class="sd-search"><i class="ti ti-search" aria-hidden="true"></i><input type="text" placeholder="Buscar cidade..." oninput="sdSearch('cidade',this.value)"></div>
+          <div class="sd-list" id="sd-cidade-list"></div>
+        </div>
+      </div>
+
+      <!-- Local -->
+      <div class="sd-wrap" style="min-width:220px">
+        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Local</label>
+        <div class="sd-trigger" id="sd-local-trigger" onclick="sdToggle('local')" tabindex="0">
+          <span id="sd-local-label">Todos os locais</span>
+          <i class="ti ti-chevron-down" aria-hidden="true"></i>
+        </div>
+        <div class="sd-panel" id="sd-local-panel">
+          <div class="sd-search"><i class="ti ti-search" aria-hidden="true"></i><input type="text" placeholder="Buscar local..." oninput="sdSearch('local',this.value)"></div>
+          <div class="sd-list" id="sd-local-list"></div>
+        </div>
+      </div>
+
+    </div>
     <!-- TIMETABLE GRID -->
     <div class="tt-legend">
       <div class="tt-leg-item"><div class="tt-leg-dot" style="background:#1D9E75"></div>Yoga</div>
@@ -890,6 +903,7 @@ async function fetchAndApplySheet(){
     WEEKS_META.length=0; meta.forEach(m=>WEEKS_META.push(m));
     buildWeekTabs();
     buildLocalWeekTabs();
+    buildCidadeDropdown();
     updateLocalDropdown();
     updateAll();
     setSyncStatus('ok');
@@ -961,18 +975,103 @@ function setPage(p){
 }
 
 /* ── WEEK TABS ── */
-function buildWeekTabs(){
-  const sel=document.getElementById('weekSelect');
-  if(!sel)return;
-  sel.innerHTML=WEEKS_META.map((w,i)=>`<option value="${i}">${w.label} · ${w.range}</option>`).join('');
-  sel.value=String(curWeek);
+/* ── SEARCHABLE DROPDOWN ENGINE ── */
+const SD_STATE = {};
+
+function sdToggle(name){
+  const panel = document.getElementById('sd-'+name+'-panel');
+  const trigger = document.getElementById('sd-'+name+'-trigger');
+  const isOpen = panel.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.sd-panel.open').forEach(p=>p.classList.remove('open'));
+  document.querySelectorAll('.sd-trigger.open').forEach(t=>t.classList.remove('open'));
+  if(!isOpen){
+    panel.classList.add('open');
+    trigger.classList.add('open');
+    const inp = panel.querySelector('input');
+    if(inp){ inp.value=''; sdSearch(name,''); inp.focus(); }
+  }
 }
+
+function sdSearch(name, q){
+  const list = document.getElementById('sd-'+name+'-list');
+  if(!list) return;
+  const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const qn = norm(q);
+  let hasResults = false;
+  list.querySelectorAll('.sd-opt').forEach(opt=>{
+    const match = !qn || norm(opt.textContent).includes(qn);
+    opt.classList.toggle('hidden', !match);
+    if(match) hasResults = true;
+  });
+  let empty = list.querySelector('.sd-empty');
+  if(!hasResults){
+    if(!empty){ empty = document.createElement('div'); empty.className='sd-empty'; empty.textContent='Nenhum resultado'; list.appendChild(empty); }
+    empty.style.display='block';
+  } else if(empty){ empty.style.display='none'; }
+}
+
+function sdSelect(name, value, label){
+  SD_STATE[name] = value;
+  const labelEl = document.getElementById('sd-'+name+'-label');
+  if(labelEl) labelEl.textContent = label;
+  // Mark selected
+  const list = document.getElementById('sd-'+name+'-list');
+  if(list) list.querySelectorAll('.sd-opt').forEach(o=>o.classList.toggle('selected', o.dataset.value===value));
+  // Close panel
+  document.getElementById('sd-'+name+'-panel').classList.remove('open');
+  document.getElementById('sd-'+name+'-trigger').classList.remove('open');
+  // Apply filter
+  if(name==='semana'){
+    curWeek=parseInt(value);
+    renderGrid(); renderOppTable();
+  } else if(name==='modalidade'){
+    catFilter=value;
+    renderGrid(); renderOppTable();
+  } else if(name==='patrocinio'){
+    spFilter=value;
+    renderGrid(); renderOppTable();
+  } else if(name==='cidade'){
+    gradeCidadeFilter=value;
+    gradeLocalFilter='all';
+    sdSelect('local','all','Todos os locais');
+    updateLocalDropdown();
+    renderGrid(); renderOppTable();
+  } else if(name==='local'){
+    gradeLocalFilter=value;
+    renderGrid(); renderOppTable();
+  }
+}
+
+// Close on outside click
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.sd-wrap')){
+    document.querySelectorAll('.sd-panel.open').forEach(p=>p.classList.remove('open'));
+    document.querySelectorAll('.sd-trigger.open').forEach(t=>t.classList.remove('open'));
+  }
+});
+
+function buildWeekTabs(){
+  const list=document.getElementById('sd-semana-list');
+  if(!list)return;
+  list.innerHTML=WEEKS_META.map((w,i)=>`<div class="sd-opt${i===curWeek?' selected':''}" data-value="${i}" onclick="sdSelect('semana','${i}','${w.label} · ${w.range}')">${w.label} · ${w.range}</div>`).join('');
+  const labelEl=document.getElementById('sd-semana-label');
+  if(labelEl&&WEEKS_META[curWeek]) labelEl.textContent=WEEKS_META[curWeek].label+' · '+WEEKS_META[curWeek].range;
+}
+function buildCidadeDropdown(){
+  const list=document.getElementById('sd-cidade-list');
+  if(!list) return;
+  const cidades=[...new Set(classes.map(c=>c.cidade).filter(Boolean))].sort();
+  list.innerHTML=`<div class="sd-opt${gradeCidadeFilter==='all'?' selected':''}" data-value="all" onclick="sdSelect('cidade','all','Todas as cidades')">Todas as cidades</div>`
+    +cidades.map(c=>`<div class="sd-opt${gradeCidadeFilter===c?' selected':''}" data-value="${c.replace(/'/g,'&#39;')}" onclick="sdSelect('cidade','${c.replace(/'/g,"\'")}','${c.replace(/'/g,"\'")}' )">${c}</div>`).join('');
+}
+
 function updateLocalDropdown(){
-  const sel=document.getElementById('gradeLocalSelect');
-  if(!sel)return;
-  const locais=[...new Set(classes.filter(c=>gradeCidadeFilter==='all'||c.cidade===gradeCidadeFilter).map(c=>c.local))].sort();
-  sel.innerHTML='<option value="all">Todos os locais</option>'+locais.map(l=>`<option value="${l}">${l}</option>`).join('');
-  sel.value=gradeLocalFilter;
+  const list=document.getElementById('sd-local-list');
+  if(!list) return;
+  const locais=[...new Set(classes.filter(c=>gradeCidadeFilter==='all'||c.cidade===gradeCidadeFilter).map(c=>c.local))].filter(Boolean).sort();
+  list.innerHTML=`<div class="sd-opt${gradeLocalFilter==='all'?' selected':''}" data-value="all" onclick="sdSelect('local','all','Todos os locais')">Todos os locais</div>`
+    +locais.map(l=>`<div class="sd-opt${gradeLocalFilter===l?' selected':''}" data-value="${l.replace(/'/g,'&#39;')}" onclick="sdSelect('local','${l.replace(/'/g,"\'")}','${l.replace(/'/g,"\'")}' )">${l}</div>`).join('');
 }
 
 /* ── KPIs ── */
