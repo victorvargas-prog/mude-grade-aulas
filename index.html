@@ -2717,7 +2717,10 @@ function renderGrid(){
     open:`<span style="display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:rgba(237,24,71,.12);color:#9c0f2e"><i class="ti ti-circle-dotted" style="font-size:8px"></i>`
   };
   const CAT_COLOR={yoga:'#1D9E75',musculacao:'#378ADD',crossfit:'#D85A30',danca:'#D4537E',meditacao:'#7F77DD',pilates:'#BA7517',hiit:'#E24B4A',volei:'#00897B',surf:'#0277BD'};
-  const CAT_BG={yoga:'#e1f5ee',musculacao:'#e6f1fb',crossfit:'#faece7',danca:'#fbeaf0',meditacao:'#eeedfe',pilates:'#faeeda',hiit:'#fcebeb',volei:'#e0f2f1',surf:'#e1f0f8'};
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const CAT_BG=isDark
+    ?{yoga:'#0d2e22',musculacao:'#0d1e35',crossfit:'#2e1408',danca:'#2e0d1a',meditacao:'#1a1830',pilates:'#2a1c06',hiit:'#2e0d0d',volei:'#0d2420',surf:'#0d1e2e',funcional:'#2e1a10',corrida:'#1e1510',boxe:'#2e0808',muaythai:'#2e0818',capoeira:'#1e0d2e',gap:'#0d2224',outros:'#1a1e22'}
+    :{yoga:'#e1f5ee',musculacao:'#e6f1fb',crossfit:'#faece7',danca:'#fbeaf0',meditacao:'#eeedfe',pilates:'#faeeda',hiit:'#fcebeb',volei:'#e0f2f1',surf:'#e1f0f8',funcional:'#fbe9e7',corrida:'#efebe9',boxe:'#ffebee',muaythai:'#fce4ec',capoeira:'#f3e5f5',gap:'#e0f7fa',outros:'#eceff1'};
 
   // Group by time+day
   const grid={};
@@ -2928,15 +2931,18 @@ function buildLocalWeekTabs(){
 
 function renderCard(c){
   const CAT_COLOR={yoga:'#1D9E75',musculacao:'#378ADD',crossfit:'#D85A30',danca:'#D4537E',meditacao:'#7F77DD',pilates:'#BA7517',hiit:'#E24B4A',volei:'#00897B',surf:'#0277BD'};
-  const CAT_BG={yoga:'#e1f5ee',musculacao:'#e6f1fb',crossfit:'#faece7',danca:'#fbeaf0',meditacao:'#eeedfe',pilates:'#faeeda',hiit:'#fcebeb',volei:'#e0f2f1',surf:'#e1f0f8'};
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const CAT_BG=isDark
+    ?{yoga:'#0d2e22',musculacao:'#0d1e35',crossfit:'#2e1408',danca:'#2e0d1a',meditacao:'#1a1830',pilates:'#2a1c06',hiit:'#2e0d0d',volei:'#0d2420',surf:'#0d1e2e',funcional:'#2e1a10',corrida:'#1e1510',boxe:'#2e0808',muaythai:'#2e0818',capoeira:'#1e0d2e',gap:'#0d2224',outros:'#1a1e22'}
+    :{yoga:'#e1f5ee',musculacao:'#e6f1fb',crossfit:'#faece7',danca:'#fbeaf0',meditacao:'#eeedfe',pilates:'#faeeda',hiit:'#fcebeb',volei:'#e0f2f1',surf:'#e1f0f8',funcional:'#fbe9e7',corrida:'#efebe9',boxe:'#ffebee',muaythai:'#fce4ec',capoeira:'#f3e5f5',gap:'#e0f7fa',outros:'#eceff1'};
   const SP_PILL={direct:`<span style="font-size:9px;font-weight:600;padding:1px 6px;border-radius:3px;background:rgba(29,158,117,.15);color:#0F6E56">Patrocinada</span>`,incentive:`<span style="font-size:9px;font-weight:600;padding:1px 6px;border-radius:3px;background:rgba(184,112,16,.15);color:#7a4c00">Incentivada</span>`,open:`<span style="font-size:9px;font-weight:600;padding:1px 6px;border-radius:3px;background:rgba(237,24,71,.12);color:#9c0f2e">Mude Mob.</span>`};
   const bg=CAT_BG[c.cat]||'#f5f4f0';
   const col=CAT_COLOR[c.cat]||'#555';
   const DAYS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
   const ws=WEEKS_META[c.week].start;
   const dt=new Date(ws[0],ws[1],ws[2]+c.day);
-  const dd=String(dt.getDate()).padStart(2,'0');
-  const mm=String(dt.getMonth()+1).padStart(2,'0');
+  const dd=dt.getDate();
+  const mm=dt.getMonth()+1;
   return `<div style="background:${bg};border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px">
     <div style="display:flex;align-items:center;justify-content:space-between">
       <span style="font-size:10px;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.04em">${CATLABELS[c.cat]||c.name}</span>
@@ -2948,7 +2954,7 @@ function renderCard(c){
       <span style="font-size:11px;color:var(--txm);display:flex;align-items:center;gap:4px"><i class="ti ti-clock" style="font-size:11px"></i>${DAYS[c.day]} ${dd}/${mm} · ${c.time}</span>
       ${c.instrutor?`<span style="font-size:11px;color:var(--txm);display:flex;align-items:center;gap:4px"><i class="ti ti-user" style="font-size:11px"></i>${c.instrutor}</span>`:''}
     </div>
-    ${c.brand?`<div style="font-size:10px;color:var(--txm);margin-top:1px">${c.brand}</div>`:''}
+    ${c.brand?`<div style="font-size:12px;font-weight:600;color:var(--tx);margin-top:4px;display:flex;align-items:center;gap:4px"><i class="ti ti-building-store" style="font-size:12px;color:var(--primary)"></i>${c.brand}</div>`:''}
     ${c.apoio?`<div style="font-size:10px;color:var(--txm);margin-top:2px;display:flex;align-items:center;gap:3px"><i class="ti ti-car" style="font-size:10px"></i>${c.apoio}</div>`:''}
   </div>`;
 }
@@ -3056,7 +3062,7 @@ function renderSponsors(){
         <div class="sp-class-meta">${['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'][c.day]||''} ${dt.getDate()}/${dt.getMonth()+1} · ${c.time} · ${c.local}${c.cidade?' · '+c.cidade:''}${c.instrutor?` · <span style="color:var(--txf)">${c.instrutor}</span>`:''}${c.apoio?` · <span style="color:var(--txf)">${c.apoio}</span>`:''}</div>
       </div><span class="badge ${c.sp==='direct'?'b-dir':c.sp==='incentive'?'b-inc':'b-open'}">${c.sp==='direct'?'Direta':c.sp==='incentive'?'Incentivo':'Mude'}</span></div>`;
     }).join('') + (sorted.length>8?`<div style="font-size:11px;color:var(--txf);padding:.4rem 0">… e mais ${sorted.length-8} aulas</div>`:'');
-    return `<div class="sp-card"><div class="sp-card-head"><div>
+    return `<div class="sp-card" style="background:var(--surf)"><div class="sp-card-head"><div>
       <div class="sp-card-name" style="display:flex;align-items:center;gap:8px">
         <div style="width:28px;height:28px;border-radius:7px;background:var(--primary-lt);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${initials}</div>${b.name}
       </div>
@@ -3141,7 +3147,7 @@ function renderProfPage(){
   if(!profList.length){ grid.innerHTML='<div style="text-align:center;padding:2rem;color:var(--txf)">Nenhum professor encontrado.</div>'; return; }
 
   grid.innerHTML = profList.map(({name, aulas})=>`
-    <div style="margin-bottom:1.5rem">
+    <div style="margin-bottom:1.5rem;background:var(--bg);padding:.5rem;border-radius:var(--rl)">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:.5px solid var(--bdr)">
         <div style="width:34px;height:34px;border-radius:50%;background:var(--primary-lt);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">${name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}</div>
         <div>
@@ -3163,7 +3169,10 @@ function renderCidades(){
   const ordem  = gv('cidadeF-ordem');
 
   const CAT_COLOR={yoga:'#1D9E75',musculacao:'#378ADD',crossfit:'#D85A30',danca:'#D4537E',meditacao:'#7F77DD',pilates:'#BA7517',hiit:'#E24B4A',volei:'#00897B',surf:'#0277BD',funcional:'#F4511E',corrida:'#8D6E63',boxe:'#C62828',muaythai:'#AD1457',capoeira:'#6A1B9A',gap:'#00838F',outros:'#78909C'};
-  const CAT_BG  ={yoga:'#e1f5ee',musculacao:'#e6f1fb',crossfit:'#faece7',danca:'#fbeaf0',meditacao:'#eeedfe',pilates:'#faeeda',hiit:'#fcebeb',volei:'#e0f2f1',surf:'#e1f0f8',funcional:'#fbe9e7',corrida:'#efebe9',boxe:'#ffebee',muaythai:'#fce4ec',capoeira:'#f3e5f5',gap:'#e0f7fa',outros:'#eceff1'};
+  const _isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const CAT_BG  =_isDark
+    ?{yoga:'#0d2e22',musculacao:'#0d1e35',crossfit:'#2e1408',danca:'#2e0d1a',meditacao:'#1a1830',pilates:'#2a1c06',hiit:'#2e0d0d',volei:'#0d2420',surf:'#0d1e2e',funcional:'#2e1a10',corrida:'#1e1510',boxe:'#2e0808',muaythai:'#2e0818',capoeira:'#1e0d2e',gap:'#0d2224',outros:'#1a1e22'}
+    :{yoga:'#e1f5ee',musculacao:'#e6f1fb',crossfit:'#faece7',danca:'#fbeaf0',meditacao:'#eeedfe',pilates:'#faeeda',hiit:'#fcebeb',volei:'#e0f2f1',surf:'#e1f0f8',funcional:'#fbe9e7',corrida:'#efebe9',boxe:'#ffebee',muaythai:'#fce4ec',capoeira:'#f3e5f5',gap:'#e0f7fa',outros:'#eceff1'};
 
   let filtered = classes.filter(c=>
     c.cidade &&
@@ -3200,7 +3209,8 @@ function renderCidades(){
         <div style="font-size:11px;font-weight:600;color:var(--txm);margin-bottom:4px">${DAYS[d]}</div>
         ${dc.slice(0,4).map(c=>{
           const bg=CAT_BG[c.cat]||'#f5f4f0'; const col=CAT_COLOR[c.cat]||'#555';
-          return `<div style="background:${bg};border-radius:5px;padding:3px 6px;margin-bottom:3px;font-size:10px;font-weight:500;color:${col}">${c.time} · ${c.name}</div>`;
+          const textCol = isDark ? (col.replace('#','').match(/[0-9a-f]{6}/i) ? '#fff' : col) : col;
+          return `<div style="background:${bg};border-radius:5px;padding:3px 6px;margin-bottom:3px;font-size:10px;font-weight:500;color:${textCol}">${c.time} · ${c.name}</div>`;
         }).join('')}
         ${dc.length>4?`<div style="font-size:10px;color:var(--txf)">+${dc.length-4} mais</div>`:''}
       </div>`;
