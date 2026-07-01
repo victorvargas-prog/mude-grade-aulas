@@ -738,16 +738,25 @@ function shRowToClass(row, idx){
   const dayRaw = shNorm(get('dia_da_semana','dia','day','weekday'));
   const dayIdx = DAY_NAME_MAP_SH[dayRaw] ?? parseInt(dayRaw) ?? 0;
 
-  // Map date → week index (built dynamically)
-  const dateRaw = get('data','date');
+  // Map date → parse robustly from any format
+  const dateRaw = get('data','date','Data');
   let dateObj = null;
   if(dateRaw){
-    const parts = dateRaw.split(/[-\/]/);
-    if(parts.length===3){
-      // Try YYYY-MM-DD or DD/MM/YYYY
-      if(parts[0].length===4) dateObj = new Date(parts[0], parts[1]-1, parts[2]);
-      else dateObj = new Date(parts[2], parts[1]-1, parts[0]);
+    // Try native Date first (handles ISO 8601: 2026-07-01)
+    const d = new Date(dateRaw);
+    if(!isNaN(d.getTime())){
+      dateObj = d;
+    } else {
+      // Try DD/MM/YYYY or DD-MM-YYYY
+      const parts = String(dateRaw).split(/[\/-]/);
+      if(parts.length===3){
+        const [a,b,c] = parts.map(Number);
+        if(a>31) dateObj = new Date(a,b-1,c); // YYYY/MM/DD
+        else     dateObj = new Date(c,b-1,a); // DD/MM/YYYY
+      }
     }
+    // Validate result
+    if(dateObj && isNaN(dateObj.getTime())) dateObj = null;
   }
 
   // Map category
@@ -780,11 +789,9 @@ function shRowToClass(row, idx){
 }
 
 function assignWeeks(rows){
-  // Group by date, sort, assign week index 0..N
-  const dated   = rows.filter(r=>r._date);
-  const undated = rows.filter(r=>!r._date);
+  const dated   = rows.filter(r=>r._date instanceof Date && !isNaN(r._date));
+  const undated = rows.filter(r=>!(r._date instanceof Date && !isNaN(r._date)));
 
-  // Collect unique ISO weeks
   const getISOWeek = d => {
     const tmp = new Date(d.getTime());
     tmp.setHours(0,0,0,0);
@@ -792,26 +799,37 @@ function assignWeeks(rows){
     const w1 = new Date(tmp.getFullYear(),0,4);
     return 1+Math.round(((tmp-w1)/86400000-3+(w1.getDay()+6)%7)/7);
   };
+
+  // If no dated rows, group by day-of-week only (week 0 for all)
+  if(!dated.length){
+    rows.forEach(r=>{ r.week=0; delete r._date; });
+    const today = new Date();
+    const meta = [{
+      label:'Sem. 1',
+      range: `${today.getDate()}/${today.getMonth()+1}`,
+      start:[today.getFullYear(), today.getMonth(), today.getDate()]
+    }];
+    return { rows, meta };
+  }
+
   const weekSet = [...new Set(dated.map(r=>getISOWeek(r._date)))].sort((a,b)=>a-b);
   const weekMap = {};
   weekSet.forEach((w,i)=>weekMap[w]=i);
 
-  // Build WEEKS_META dynamically
   const newMeta = weekSet.map((iso,i)=>{
-    const datesInWeek = dated.filter(r=>getISOWeek(r._date)===iso).map(r=>r._date);
+    const datesInWeek = dated.filter(r=>getISOWeek(r._date)===iso).map(r=>r._date.getTime());
     const minD = new Date(Math.min(...datesInWeek));
     const maxD = new Date(Math.max(...datesInWeek));
     const fmt  = d=>`${d.getDate()}/${d.getMonth()+1}`;
     return {
-      label:`Sem. ${i+1}`,
-      range:`${fmt(minD)} – ${fmt(maxD)}`,
-      start:[minD.getFullYear(), minD.getMonth(), minD.getDate()]
+      label: `Sem. ${i+1}`,
+      range: `${fmt(minD)} – ${fmt(maxD)}`,
+      start: [minD.getFullYear(), minD.getMonth(), minD.getDate()]
     };
   });
 
-  // Assign week index
-  dated.forEach(r=>{ r.week=weekMap[getISOWeek(r._date)]??0; delete r._date; });
-  undated.forEach((r,i)=>{ r.week=0; delete r._date; });
+  dated.forEach(r=>{ r.week = weekMap[getISOWeek(r._date)] ?? 0; delete r._date; });
+  undated.forEach(r=>{ r.week = 0; delete r._date; });
 
   return { rows:[...dated,...undated], meta:newMeta };
 }
