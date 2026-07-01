@@ -973,11 +973,11 @@ function updateLocalDropdown(){
 
 /* ── KPIs ── */
 function updateKPIs(){
-  document.getElementById('kpi-total').textContent=classes.length;
-  document.getElementById('kpi-open').textContent=classes.filter(c=>c.sp==='open').length;
-  document.getElementById('kpi-inc').textContent=classes.filter(c=>c.sp==='incentive').length;
-  document.getElementById('kpi-dir').textContent=classes.filter(c=>c.sp==='direct').length;
-  
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('kpi-total', classes.length);
+  set('kpi-open',  classes.filter(c=>c.sp==='open').length);
+  set('kpi-inc',   classes.filter(c=>c.sp==='incentive').length);
+  set('kpi-dir',   classes.filter(c=>c.sp==='direct').length);
 }
 
 /* ── GRID ── */
@@ -1101,8 +1101,8 @@ function renderGrid(){
 
 function renderOppTable(){
   const rows=classes.filter(c=>c.week===curWeek&&c.sp==='open'&&(gradeLocalFilter==='all'||c.local===gradeLocalFilter)&&(catFilter==='all'||c.cat===catFilter)&&(gradeCidadeFilter==='all'||c.cidade===gradeCidadeFilter)).sort((a,b)=>a.day-b.day||a.time.localeCompare(b.time));
-  document.getElementById('oppCount').textContent=rows.length+' disponíveis';
-  document.getElementById('oppBody').innerHTML=rows.length===0?'<tr><td colspan="7" style="text-align:center;color:var(--txf);padding:1.5rem">Nenhuma aula sem patrocínio nesta semana.</td></tr>':
+  const oppC=document.getElementById('oppCount');if(oppC)oppC.textContent=rows.length+' disponíveis';
+  const oppB=document.getElementById('oppBody');if(oppB)oppB.innerHTML=rows.length===0?'<tr><td colspan="7" style="text-align:center;color:var(--txf);padding:1.5rem">Nenhuma aula sem patrocínio nesta semana.</td></tr>':
     rows.map(r=>{const ws=WEEKS_META[r.week].start;const date=new Date(ws[0],ws[1],ws[2]+r.day);const brands=(BRANDMAP[r.cat]||[]).map(b=>`<span class="bpill">${b}</span>`).join('');return`<tr><td>${DAYFULL[r.day]}, ${date.getDate()}/${String(date.getMonth()+1).padStart(2,'0')}</td><td style="font-weight:500">${r.time}</td><td>${r.name}</td><td><span class="b-cat">${CATLABELS[r.cat]||r.cat}</span></td><td>${r.local}</td><td style="font-size:11px;color:var(--txm)">${r.apoio||'—'}</td><td><div class="brand-pills">${brands}</div></td></tr>`;}).join('');
 }
 
@@ -1178,8 +1178,12 @@ async function saveClass(){
   closeModal();await saveClasses();updateAll();showToast('Aula atualizada');
 }
 function showToast(msg){
-  const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;
-  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);
+  const t=document.getElementById('toast');
+  const tm=document.getElementById('toastMsg');
+  if(!t||!tm)return;
+  tm.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
 }
 function updateAll(){updateKPIs();renderGrid();renderOppTable();updateInsights();}
 
@@ -1239,23 +1243,26 @@ function renderExportPreview(){
 
 /* ── INSIGHTS & BRAND REC ── */
 function updateInsights(){
-  const wl=WEEKS_META.map(w=>w.label);
-  const openD=[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='open').length);
-  const incD=[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='incentive').length);
-  const dirD=[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='direct').length);
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  try{
+    const openD=[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='open').length);
+    const incD=[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='incentive').length);
+    const dirD=[0,1].map(w=>classes.filter(c=>c.week===w&&c.sp==='direct').length);
     const totalW=[0,1].map(w=>classes.filter(c=>c.week===w).length);
-  const maxOI=openD.indexOf(Math.max(...openD));
-  document.getElementById('ins1').textContent=`${WEEKS_META[maxOI].label} (${WEEKS_META[maxOI].range}) tem ${openD[maxOI]} aulas sem patrocínio — maior janela do período.`;
-  const cfO=[0,1,2,3].map(w=>classes.filter(c=>c.week===w&&c.cat==='crossfit'&&c.sp==='open').length);
-  document.getElementById('ins2').textContent=`CrossFit tem ${Math.max(...cfO)} slots CrossFit abertos sem patrocínio. Prioridade para ativação.`;
-  const bestI=dirD.map((d,i)=>totalW[i]?Math.round(d/totalW[i]*100):0).reduce((bi,v,i,a)=>v>a[bi]?i:bi,0);
-  document.getElementById('ins3').textContent=`${WEEKS_META[bestI].label} tem maior cobertura de patrocínio direto (${dirD[bestI]} de ${totalW[bestI]} aulas).`;
-  document.getElementById('ins4').textContent=`Yoga tem ${classes.filter(c=>c.cat==='yoga'&&c.sp==='open').length} slots abertos — perfil ideal para Vivo e Danone YoPRO.`;
-  const covPct=classes.length?Math.round(classes.filter(c=>c.sp!=='open').length/classes.length*100):0;
-  document.getElementById('ins6').textContent=`${covPct}% das aulas têm algum patrocínio. Meta: ≥85%. ${covPct<85?'Ampliar parcerias.':'Acima da meta.'}`;
-  document.getElementById('brandRec').innerHTML=[{brand:'Vivo',seg:'Telecom',cats:['yoga','meditacao'],weeks:'2,3,4',type:'Naming'},{brand:'Amstel Ultra',seg:'Bebidas',cats:['crossfit','hiit'],weeks:'1,2',type:'Pós-treino'},{brand:'Danone YoPRO',seg:'Nutrição',cats:['musculacao','pilates'],weeks:'1,3',type:'Sampling'},{brand:'Under Armour',seg:'Moda',cats:['crossfit','danca','hiit'],weeks:'3,4',type:'Kit instrutores'},{brand:'Santander',seg:'Financeiro',cats:['yoga','danca'],weeks:'2,4',type:'Branding'},{brand:'Bradesco Saúde',seg:'Saúde',cats:['meditacao','pilates'],weeks:'1,2,3',type:'Lei Incentivo'}].map(r=>{const slots=r.cats.reduce((s,c)=>s+classes.filter(cl=>cl.cat===c&&cl.sp==='open').length,0);return`<tr><td style="font-weight:500">${r.brand}</td><td>${r.seg}</td><td>${r.cats.map(c=>`<span class="b-cat" style="margin-right:3px">${CATLABELS[c]}</span>`).join('')}</td><td>Sem. ${r.weeks}</td><td><span class="badge b-open">${slots} slots</span></td><td>—</td><td>${r.type}</td></tr>`;}).join('');
+    if(WEEKS_META.length){
+      const maxOI=openD.indexOf(Math.max(...openD));
+      if(WEEKS_META[maxOI]) set('ins1',WEEKS_META[maxOI].label+' ('+WEEKS_META[maxOI].range+') tem '+openD[maxOI]+' aulas sem patrocínio — maior janela do período.');
+      const bestI=dirD.map((d,i)=>totalW[i]?Math.round(d/totalW[i]*100):0).reduce((bi,v,i,a)=>v>a[bi]?i:bi,0);
+      if(WEEKS_META[bestI]) set('ins3',WEEKS_META[bestI].label+' tem maior cobertura de patrocínio direto ('+dirD[bestI]+' de '+totalW[bestI]+' aulas).');
+    }
+    set('ins2','HIIT tem '+classes.filter(c=>c.cat==='hiit'&&c.sp==='open').length+' slots abertos sem patrocínio. Prioridade para ativação.');
+    set('ins4','Yoga tem '+classes.filter(c=>c.cat==='yoga'&&c.sp==='open').length+' slots abertos.');
+    const covPct=classes.length?Math.round(classes.filter(c=>c.sp!=='open').length/classes.length*100):0;
+    set('ins6',covPct+'% das aulas têm algum patrocínio. Meta: ≥85%. '+(covPct<85?'Ampliar parcerias.':'Acima da meta.'));
+    const brEl=document.getElementById('brandRec');
+    if(brEl) brEl.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--txf);padding:1rem">Dados carregados do Google Sheets</td></tr>';
+  }catch(ex){ console.warn('insights error:',ex.message); }
 }
-
 
 /* ── LOCAL PAGE ── */
 let localWeek=0, profWeek=0;
