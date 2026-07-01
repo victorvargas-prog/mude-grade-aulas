@@ -821,10 +821,13 @@ function assignWeeks(rows){
     const minD = new Date(Math.min(...datesInWeek));
     const maxD = new Date(Math.max(...datesInWeek));
     const fmt  = d=>`${d.getDate()}/${d.getMonth()+1}`;
+    // Ensure full week range (Mon–Sun)
+    const weekStart = new Date(minD); weekStart.setDate(weekStart.getDate() - (weekStart.getDay()||7)+1);
+    const weekEnd   = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+6);
     return {
       label: `Sem. ${i+1}`,
-      range: `${fmt(minD)} – ${fmt(maxD)}`,
-      start: [minD.getFullYear(), minD.getMonth(), minD.getDate()]
+      range: `${fmt(weekStart)} – ${fmt(weekEnd)}`,
+      start: [weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate()]
     };
   });
 
@@ -882,19 +885,22 @@ async function fetchAndApplySheet(){
     updateLocalDropdown();
     updateAll();
     setSyncStatus('ok');
-    // Update hero
-    const titleEl=document.getElementById('heroTitle');
-    const subEl=document.getElementById('heroSub');
-    const eyeEl=document.getElementById('heroEye');
-    if(rows.length){
-      const datas=rows.filter(r=>r._date||true).map(r=>r.week);
-      const cidades=[...new Set(rows.map(r=>r.cidade).filter(Boolean))];
-      const cidadeText = cidades.length===1?cidades[0]:cidades.length>1?'Brasil':'';
-      if(titleEl) titleEl.textContent=meta[0]?`${meta[0].range.split('–')[0].trim().split('/')[1]||''}/${meta[meta.length-1].range.split('–')[1]?.trim().split('/')[1]||''} 2026`.replace('//','/2026'):'2026';
-      if(eyeEl&&cidadeText) eyeEl.textContent='Grade de aulas · Mude '+cidadeText;
-      if(subEl) subEl.textContent=classes.length.toLocaleString('pt-BR')+' aulas · '+cidades.slice(0,5).join(', ')+(cidades.length>5?' e mais...':'');
-    }
-    setTimeout(()=>showToast('✓ '+classes.length.toLocaleString('pt-BR')+' aulas sincronizadas'),100);
+    // Update hero safely
+    setTimeout(()=>{
+      const titleEl=document.getElementById('heroTitle');
+      const subEl=document.getElementById('heroSub');
+      const eyeEl=document.getElementById('heroEye');
+      try{
+        const cidades=[...new Set(classes.map(r=>r.cidade).filter(Boolean))];
+        const primeiro=meta[0]?meta[0].range:'';
+        const ultimo=meta[meta.length-1]?meta[meta.length-1].range:'';
+        const periodo=primeiro===ultimo?primeiro:primeiro+' – '+ultimo.split('–')[1];
+        if(titleEl) titleEl.textContent='Julho 2026';
+        if(eyeEl) eyeEl.textContent='Grade de aulas · Mude Brasil';
+        if(subEl) subEl.textContent=classes.length.toLocaleString('pt-BR')+' aulas · '+cidades.slice(0,4).join(', ')+(cidades.length>4?' e mais '+( cidades.length-4)+' cidades':'');
+      }catch(ex){ console.warn('hero update:',ex.message); }
+      showToast('✓ '+classes.length.toLocaleString('pt-BR')+' aulas sincronizadas');
+    },200);
     console.log('Sheets API: '+classes.length+' aulas, '+meta.length+' semanas');
     return true;
   }catch(e){
@@ -950,8 +956,12 @@ function setPage(p){
 function buildWeekTabs(){
   const sel=document.getElementById('weekSelect');
   if(!sel)return;
-  sel.innerHTML=WEEKS_META.map((w,i)=>`<option value="${i}">${w.label} · ${w.range}</option>`).join('');
-  sel.value=curWeek;
+  sel.innerHTML=WEEKS_META.map((w,i)=>{
+    // Format: "Sem. 1 · 1/7 – 7/7"
+    const label=w.label+' · '+w.range;
+    return `<option value="${i}">${label}</option>`;
+  }).join('');
+  sel.value=String(curWeek);
 }
 function updateLocalDropdown(){
   const sel=document.getElementById('gradeLocalSelect');
