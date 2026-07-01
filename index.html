@@ -269,9 +269,9 @@ tr:hover td{background:var(--surf2)}
 <!-- GRADE PAGE -->
 <div class="page active" id="page-grade">
   <div class="hero">
-    <div class="hero-eye">Grade de aulas · Mude Rio de Janeiro</div>
-    <div class="hero-title">Junho 2026</div>
-    <div class="hero-sub">Modalidade, horário, local e patrocinador por dia da semana · Scroll horizontal para ver todos os dias</div>
+    <div class="hero-eye" id="heroEye">Grade de aulas · Mude Brasil</div>
+    <div class="hero-title" id="heroTitle">Carregando...</div>
+    <div class="hero-sub" id="heroSub">Modalidade, horário, local e patrocinador por dia da semana</div>
     <div class="hero-kpis">
       <div class="kpi"><div class="kpi-v" id="kpi-total">—</div><div class="kpi-l">Total de aulas</div></div>
       <div class="kpi"><div class="kpi-v" id="kpi-open">—</div><div class="kpi-l">Mude Mobiliários</div></div>
@@ -882,22 +882,35 @@ async function fetchAndApplySheet(){
     updateLocalDropdown();
     updateAll();
     setSyncStatus('ok');
-    showToast('✓ '+classes.length+' aulas sincronizadas do Google Sheets');
+    // Update hero
+    const titleEl=document.getElementById('heroTitle');
+    const subEl=document.getElementById('heroSub');
+    const eyeEl=document.getElementById('heroEye');
+    if(rows.length){
+      const datas=rows.filter(r=>r._date||true).map(r=>r.week);
+      const cidades=[...new Set(rows.map(r=>r.cidade).filter(Boolean))];
+      const cidadeText = cidades.length===1?cidades[0]:cidades.length>1?'Brasil':'';
+      if(titleEl) titleEl.textContent=meta[0]?`${meta[0].range.split('–')[0].trim().split('/')[1]||''}/${meta[meta.length-1].range.split('–')[1]?.trim().split('/')[1]||''} 2026`.replace('//','/2026'):'2026';
+      if(eyeEl&&cidadeText) eyeEl.textContent='Grade de aulas · Mude '+cidadeText;
+      if(subEl) subEl.textContent=classes.length.toLocaleString('pt-BR')+' aulas · '+cidades.slice(0,5).join(', ')+(cidades.length>5?' e mais...':'');
+    }
+    setTimeout(()=>showToast('✓ '+classes.length.toLocaleString('pt-BR')+' aulas sincronizadas'),100);
     console.log('Sheets API: '+classes.length+' aulas, '+meta.length+' semanas');
     return true;
   }catch(e){
     console.error('Sheets API erro:', e.message);
     setSyncStatus('error');
     // Show error clearly to user
-    // Show error in all possible places
-    document.querySelectorAll('#sheetsError').forEach(el=>{
-      el.textContent = '⚠ Erro ao carregar planilha: '+e.message;
-      el.style.display='block';
-    });
-    // Also show as toast
-    const tm=document.getElementById('toastMsg');
-    const tb=document.getElementById('toast');
-    if(tm&&tb){tm.textContent='⚠ '+e.message;tb.style.background='#c0362a';tb.classList.add('show');setTimeout(()=>{tb.classList.remove('show');tb.style.background='';},6000);}
+    // Defer display until DOM is ready
+    setTimeout(()=>{
+      document.querySelectorAll('#sheetsError').forEach(el=>{
+        el.textContent='⚠ Erro ao carregar planilha: '+e.message;
+        el.style.display='block';
+      });
+      const tm=document.getElementById('toastMsg');
+      const tb=document.getElementById('toast');
+      if(tm&&tb){tm.textContent='⚠ '+e.message;tb.style.background='#c0362a';tb.classList.add('show');setTimeout(()=>{tb.classList.remove('show');tb.style.background='';},6000);}
+    },300);
     return false;
   }
 }
