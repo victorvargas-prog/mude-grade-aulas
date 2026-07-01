@@ -631,8 +631,63 @@ let classes=[],curWeek=0,catFilter='all',spFilter='all',gradeLocalFilter='all',e
 let spWeekFilter='all',spTypeFilter='all';
 
 
+// ── GOOGLE SHEETS CONFIG ─────────────────────────────────────────────────────
+// Cole aqui as URLs CSV publicadas da sua planilha Google Sheets.
+// Arquivo → Compartilhar → Publicar na web → selecione a aba → CSV
+// Deixe vazio para usar os dados dos PDFs.
+const SHEETS_URLS = [
+  '', // Semana 1 — URL CSV da aba Semana 1
+  '', // Semana 2 — URL CSV da aba Semana 2
+];
+
+const DAY_NAME_MAP = {'segunda':0,'seg':0,'terca':1,'terça':1,'ter':1,'quarta':2,'qua':2,'quinta':3,'qui':3,'sexta':4,'sex':4,'sabado':5,'sábado':5,'sab':5,'sáb':5,'domingo':6,'dom':6};
+const CAT_MAP = {'yoga':'yoga','beach workout':'hiit','hiit':'hiit','boxe':'hiit','fight training':'hiit','fut-funcional':'hiit','mat pilates':'pilates','pilates':'pilates','crosstraining':'crossfit','cross training':'crossfit','dança':'danca','danca':'danca','vôlei de praia':'volei','volei':'volei','surf':'surf'};
+
+function parseCSV(text){
+  const lines=text.trim().split('\n').filter(l=>l.trim());
+  if(!lines.length) return [];
+  const sep=lines[0].includes(';')?';':',';
+  const norm=s=>s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'_').replace(/__+/g,'_');
+  const headers=lines[0].replace(/\r/,'').split(sep).map(h=>norm(h));
+  return lines.slice(1).map((line,i)=>{
+    const vals=line.replace(/\r/,'').split(sep).map(v=>v.trim().replace(/^"|"$/g,''));
+    const row={};headers.forEach((h,j)=>row[h]=vals[j]||'');
+    return row;
+  }).filter(r=>Object.values(r).some(v=>v));
+}
+
+function rowToClass(row,weekIdx,rowIdx){
+  const get=(...keys)=>{for(const k of keys){const f=Object.keys(row).find(h=>h===k||h.startsWith(k));if(f&&row[f])return row[f].trim();}return '';};
+  const dayRaw=get('dia','day').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const dayIdx=DAY_NAME_MAP[dayRaw]??parseInt(dayRaw)??0;
+  const timeRaw=get('horario','hora','time').replace(/h/gi,':').replace(/^(\d):/,'0$1:').replace(/:$/,'').replace(/:(\d)$/,':0$1');
+  const catRaw=get('modalidade','cat').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const catKey=CAT_MAP[catRaw]||catRaw||'yoga';
+  const spRaw=get('patrocinio','sp').toLowerCase();
+  const sp=spRaw.includes('direct')||spRaw.includes('diret')?'direct':spRaw.includes('incent')?'incentive':'open';
+  return {id:`s${weekIdx}-${rowIdx}`,week:weekIdx,day:isNaN(dayIdx)?0:dayIdx,time:timeRaw||'06:00',name:get('nome','aula','name')||'Aula',cat:catKey,local:get('local','localizacao')||'',sp,brand:get('marca','patrocinador','brand')||'',instrutor:get('instrutor','professor')||'',aud:parseInt(get('publico','aud'))||0,apoio:get('apoio','veiculo','transporte')||''};
+}
+
+async function fetchSheetData(){
+  const urls=SHEETS_URLS.filter(u=>u.trim());
+  if(!urls.length) return null;
+  try{
+    const results=await Promise.all(urls.map(async(url,wi)=>{
+      const res=await fetch(url);
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const rows=parseCSV(await res.text());
+      return rows.map((r,i)=>rowToClass(r,wi,i));
+    }));
+    const data=results.flat().filter(c=>c.name&&c.local);
+    return data.length?data:null;
+  }catch(e){console.warn('Sheets error:',e.message);return null;}
+}
+
 async function loadClasses(){
-  classes = seedData();
+  const sheetData=await fetchSheetData();
+  if(sheetData){classes=sheetData;console.log('Sheets: '+classes.length+' aulas');return;}
+  classes=seedData();
+  console.log('Fallback: '+classes.length+' aulas (dados PDF)');
 }
 
 async function saveClasses(){
