@@ -442,45 +442,68 @@ tr:hover td{background:var(--surf2)}
   <div class="hero" style="padding-bottom:1.5rem">
     <div class="hero-eye">Aulas por local · Brasil</div>
     <div class="hero-title">Visualizar por local</div>
-    <div class="hero-sub">Selecione o local para ver todas as aulas que acontecem nele</div>
+    <div class="hero-sub">Use os filtros para encontrar aulas em um local ou cidade específicos</div>
   </div>
   <div class="wrap">
-    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1.25rem;align-items:flex-end">
-      <div style="flex:1;min-width:180px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Buscar local</label>
-        <div style="display:flex;align-items:center;gap:6px;background:var(--surf2);border:.5px solid var(--bdr2);border-radius:var(--r);padding:7px 10px">
-          <i class="ti ti-search" style="font-size:13px;color:var(--txf);flex-shrink:0" aria-hidden="true"></i>
-          <input id="localF-search" type="text" placeholder="Ex: Parque, Praça..." oninput="renderLocalPage()" style="border:none;background:none;font-size:13px;font-family:'Inter',sans-serif;color:var(--tx);outline:none;width:100%">
+    <!-- Search bar with button -->
+    <div style="background:var(--surf);border:.5px solid var(--bdr2);border-radius:var(--rl);padding:1.25rem;margin-bottom:1.25rem">
+      <div style="font-size:13px;font-weight:600;margin-bottom:.9rem;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-filter" style="color:var(--primary);font-size:15px" aria-hidden="true"></i>
+        Filtrar aulas por local
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1rem">
+        <div style="flex:2;min-width:200px">
+          <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Buscar local</label>
+          <div style="display:flex;align-items:center;gap:6px;background:var(--surf2);border:.5px solid var(--bdr2);border-radius:var(--r);padding:8px 12px">
+            <i class="ti ti-search" style="font-size:14px;color:var(--txf);flex-shrink:0" aria-hidden="true"></i>
+            <input id="localF-search" type="text" placeholder="Nome do local, parque, praça..." onkeydown="if(event.key==='Enter')renderLocalPage()" style="border:none;background:none;font-size:13px;font-family:'Inter',sans-serif;color:var(--tx);outline:none;width:100%">
+          </div>
+        </div>
+        <div style="min-width:170px">
+          <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Cidade</label>
+          <select id="localF-cidade" style="width:100%;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
+            <option value="all">Todas as cidades</option>
+          </select>
+        </div>
+        <div style="min-width:160px">
+          <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Semana</label>
+          <select id="localF-semana" style="width:100%;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
+            <option value="all">Todas</option>
+          </select>
+        </div>
+        <div style="min-width:160px">
+          <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Modalidade</label>
+          <select id="localF-modal" style="width:100%;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
+            <option value="all">Todas</option>
+          </select>
+        </div>
+        <div style="min-width:160px">
+          <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Ordenar</label>
+          <select id="localF-ordem" style="width:100%;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
+            <option value="nome">Nome A–Z</option>
+            <option value="aulas_desc">Mais aulas</option>
+            <option value="aulas_asc">Menos aulas</option>
+          </select>
         </div>
       </div>
-      <div style="min-width:160px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Semana</label>
-        <select id="localF-semana" onchange="renderLocalPage()" style="width:100%;padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
-          <option value="all">Todas</option>
-        </select>
-      </div>
-      <div style="min-width:160px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Cidade</label>
-        <select id="localF-cidade" onchange="renderLocalPage()" style="width:100%;padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
-          <option value="all">Todas as cidades</option>
-        </select>
-      </div>
-      <div style="min-width:160px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Modalidade</label>
-        <select id="localF-modal" onchange="renderLocalPage()" style="width:100%;padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
-          <option value="all">Todas</option>
-        </select>
-      </div>
-      <div style="min-width:160px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Ordenar</label>
-        <select id="localF-ordem" onchange="renderLocalPage()" style="width:100%;padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
-          <option value="nome">Nome A–Z</option>
-          <option value="aulas_desc">Mais aulas</option>
-          <option value="aulas_asc">Menos aulas</option>
-        </select>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="renderLocalPage()" style="display:flex;align-items:center;gap:6px;padding:9px 20px;background:var(--primary);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;font-weight:500;cursor:pointer">
+          <i class="ti ti-search" style="font-size:14px" aria-hidden="true"></i>Buscar
+        </button>
+        <button onclick="clearLocalFilters()" style="display:flex;align-items:center;gap:6px;padding:9px 16px;background:var(--surf2);color:var(--txm);border:.5px solid var(--bdr2);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;font-weight:500;cursor:pointer">
+          <i class="ti ti-x" style="font-size:13px" aria-hidden="true"></i>Limpar
+        </button>
+        <span id="localResultCount" style="font-size:12px;color:var(--txf)"></span>
       </div>
     </div>
-    <div id="localGrid"></div>
+    <!-- Results -->
+    <div id="localGrid">
+      <div style="text-align:center;padding:3rem 1rem;color:var(--txf)">
+        <i class="ti ti-map-pin" style="font-size:40px;display:block;margin-bottom:.75rem;opacity:.3" aria-hidden="true"></i>
+        <div style="font-size:14px;font-weight:500;margin-bottom:.35rem">Use os filtros acima para buscar</div>
+        <div style="font-size:12px">Selecione uma cidade, modalidade ou digite o nome do local</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1061,7 +1084,7 @@ function setPage(p){
   document.getElementById('tab-'+p).classList.add('active');
   if(p==='sponsors')renderSponsors();
   if(p==='export')renderExportPreview();
-  if(p==='local')renderLocalPage();
+  if(p==='local'){populateFilterSelects();renderLocalPage();}
   if(p==='professor')renderProfPage();
   if(p==='cidades'){populateFilterSelects();renderCidades();}
   if(p==='sponsors'){populateFilterSelects();renderSponsors();}
@@ -1592,6 +1615,21 @@ function renderLocalPage(){
   const cidade = gv('localF-cidade');
   const modal  = gv('localF-modal');
   const ordem  = gv('localF-ordem');
+  const grid   = document.getElementById('localGrid');
+  const countEl= document.getElementById('localResultCount');
+  if(!grid) return;
+
+  // Show placeholder if no filter is active
+  const hasFilter = q || semana!=='all' || cidade!=='all' || modal!=='all';
+  if(!hasFilter){
+    grid.innerHTML=`<div style="text-align:center;padding:3rem 1rem;color:var(--txf)">
+      <i class="ti ti-map-pin" style="font-size:40px;display:block;margin-bottom:.75rem;opacity:.3" aria-hidden="true"></i>
+      <div style="font-size:14px;font-weight:500;margin-bottom:.35rem">Use os filtros acima para buscar</div>
+      <div style="font-size:12px">Selecione uma cidade, modalidade ou digite o nome do local</div>
+    </div>`;
+    if(countEl) countEl.textContent='';
+    return;
+  }
 
   let filtered = classes.filter(c=>
     (semana==='all'||String(c.week)===semana) &&
@@ -1602,31 +1640,45 @@ function renderLocalPage(){
   const byLocal = {};
   filtered.forEach(c=>{
     const l=c.local||'—';
-    if(!byLocal[l]) byLocal[l]={name:l,aulas:[]};
+    if(!byLocal[l]) byLocal[l]={name:l,cidade:c.cidade||'',aulas:[]};
     byLocal[l].aulas.push(c);
   });
 
-  let localList = Object.values(byLocal).filter(l=> !q || norm(l.name).includes(q));
+  let localList = Object.values(byLocal).filter(l=> !q || norm(l.name).includes(q) || norm(l.cidade).includes(q));
   if(ordem==='aulas_desc') localList.sort((a,b)=>b.aulas.length-a.aulas.length);
   else if(ordem==='aulas_asc') localList.sort((a,b)=>a.aulas.length-b.aulas.length);
   else localList.sort((a,b)=>a.name.localeCompare(b.name));
 
-  const grid = document.getElementById('localGrid');
-  if(!grid) return;
-  if(!localList.length){ grid.innerHTML='<div style="text-align:center;padding:2rem;color:var(--txf)">Nenhum local encontrado.</div>'; return; }
+  if(countEl) countEl.textContent=localList.length+' local'+( localList.length!==1?'is':'')+' encontrado'+(localList.length!==1?'s':'');
 
-  grid.innerHTML = localList.map(({name, aulas})=>`
+  if(!localList.length){
+    grid.innerHTML='<div style="text-align:center;padding:2rem;color:var(--txf)">Nenhum local encontrado com os filtros selecionados.</div>';
+    return;
+  }
+
+  grid.innerHTML = localList.map(({name, cidade, aulas})=>`
     <div style="margin-bottom:1.5rem">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:.5px solid var(--bdr)">
         <i class="ti ti-map-pin" style="font-size:16px;color:var(--primary)" aria-hidden="true"></i>
         <span style="font-size:14px;font-weight:600">${name}</span>
         <span style="font-size:11px;color:var(--txm);background:var(--surf2);padding:2px 8px;border-radius:10px">${aulas.length} aula${aulas.length!==1?'s':''}</span>
-        ${aulas[0]?.cidade?`<span style="font-size:11px;color:var(--txf)">${aulas[0].cidade}</span>`:''}
+        ${cidade?`<span style="font-size:11px;color:var(--txf)">${cidade}</span>`:''}
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px">
         ${aulas.sort((a,b)=>a.week-b.week||a.day-b.day||a.time.localeCompare(b.time)).map(c=>renderCard(c)).join('')}
       </div>
     </div>`).join('');
+}
+
+function clearLocalFilters(){
+  const ids=['localF-search','localF-cidade','localF-semana','localF-modal'];
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    if(el.tagName==='INPUT') el.value='';
+    else el.value='all';
+  });
+  renderLocalPage();
 }
 
 /* ── RENDER PROFESSOR (with filters) ── */
