@@ -741,7 +741,7 @@ tr:hover td{background:var(--surf2)}
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const ACCESS_CODE='Mud3Aulas';
-const SESSION_KEY='mude_auth_v4';
+const SESSION_KEY='mude_auth_v5';
 const STORAGE_KEY='mude_classes_v8';
 
 /* ── AUTH ── */
@@ -1842,5 +1842,14 @@ function clearCidadeFilters(){
   });
   renderCidades();
 }
-
->
+async function initApp(){
+  initTheme();
+  setTodayLabel();
+  setSyncStatus('syncing');
+  await fetchAndApplySheet();
+  startAutoRefresh();
+}
+document.addEventListener('DOMContentLoaded', checkSession);
+</script>
+</body>
+</html>
