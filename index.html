@@ -789,50 +789,56 @@ function shRowToClass(row, idx){
 }
 
 function assignWeeks(rows){
+  // Helper: get Monday of the week for a given date
+  function getMondayOf(d){
+    const day = d.getDay(); // 0=Sun,1=Mon,...6=Sat
+    const diff = (day===0) ? -6 : 1-day; // shift to Monday
+    const mon = new Date(d);
+    mon.setDate(d.getDate()+diff);
+    mon.setHours(0,0,0,0);
+    return mon;
+  }
+
   const dated   = rows.filter(r=>r._date instanceof Date && !isNaN(r._date));
   const undated = rows.filter(r=>!(r._date instanceof Date && !isNaN(r._date)));
 
-  const getISOWeek = d => {
-    const tmp = new Date(d.getTime());
-    tmp.setHours(0,0,0,0);
-    tmp.setDate(tmp.getDate()+3-(tmp.getDay()+6)%7);
-    const w1 = new Date(tmp.getFullYear(),0,4);
-    return 1+Math.round(((tmp-w1)/86400000-3+(w1.getDay()+6)%7)/7);
-  };
-
-  // If no dated rows, group by day-of-week only (week 0 for all)
   if(!dated.length){
     rows.forEach(r=>{ r.week=0; delete r._date; });
-    const today = new Date();
-    const meta = [{
-      label:'Sem. 1',
-      range: `${today.getDate()}/${today.getMonth()+1}`,
-      start:[today.getFullYear(), today.getMonth(), today.getDate()]
-    }];
-    return { rows, meta };
+    const today=new Date();
+    return { rows, meta:[{label:'Sem. 1',range:today.getDate()+'/'+(today.getMonth()+1)+' – '+(today.getDate()+6)+'/'+(today.getMonth()+1),start:[today.getFullYear(),today.getMonth(),today.getDate()]}] };
   }
 
-  const weekSet = [...new Set(dated.map(r=>getISOWeek(r._date)))].sort((a,b)=>a-b);
-  const weekMap = {};
-  weekSet.forEach((w,i)=>weekMap[w]=i);
+  // Group by Monday of week → unique weeks sorted
+  const monMap = {}; // "YYYY-MM-DD" → Date object
+  dated.forEach(r=>{
+    const mon = getMondayOf(r._date);
+    const key = mon.toISOString().slice(0,10);
+    if(!monMap[key]) monMap[key]=mon;
+  });
 
-  const newMeta = weekSet.map((iso,i)=>{
-    const datesInWeek = dated.filter(r=>getISOWeek(r._date)===iso).map(r=>r._date.getTime());
-    const minD = new Date(Math.min(...datesInWeek));
-    const maxD = new Date(Math.max(...datesInWeek));
-    const fmt  = d=>`${d.getDate()}/${d.getMonth()+1}`;
-    // Ensure full week range (Mon–Sun)
-    const weekStart = new Date(minD); weekStart.setDate(weekStart.getDate() - (weekStart.getDay()||7)+1);
-    const weekEnd   = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+6);
+  const mondays = Object.values(monMap).sort((a,b)=>a-b);
+  const weekIdx = {}; // monday key → index
+  mondays.forEach((mon,i)=>weekIdx[mon.toISOString().slice(0,10)]=i);
+
+  const fmt = d => d.getDate()+'/'+(d.getMonth()+1);
+
+  const newMeta = mondays.map((mon,i)=>{
+    const sun = new Date(mon); sun.setDate(mon.getDate()+6);
     return {
-      label: `Sem. ${i+1}`,
-      range: `${fmt(weekStart)} – ${fmt(weekEnd)}`,
-      start: [weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate()]
+      label: 'Sem. '+(i+1),
+      range: fmt(mon)+' – '+fmt(sun),
+      start: [mon.getFullYear(), mon.getMonth(), mon.getDate()]
     };
   });
 
-  dated.forEach(r=>{ r.week = weekMap[getISOWeek(r._date)] ?? 0; delete r._date; });
-  undated.forEach(r=>{ r.week = 0; delete r._date; });
+  // Assign week index to each row
+  dated.forEach(r=>{
+    const mon = getMondayOf(r._date);
+    const key = mon.toISOString().slice(0,10);
+    r.week = weekIdx[key] ?? 0;
+    delete r._date;
+  });
+  undated.forEach(r=>{ r.week=0; delete r._date; });
 
   return { rows:[...dated,...undated], meta:newMeta };
 }
