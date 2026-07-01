@@ -558,40 +558,61 @@ tr:hover td{background:var(--surf2)}
 <div class="page" id="page-cidades">
   <div class="hero" style="padding-bottom:1.5rem">
     <div class="hero-eye">Grade por cidade · Brasil</div>
-    <div class="hero-title" id="cidadesHeroTitle">Aulas por cidade</div>
+    <div class="hero-title">Aulas por cidade</div>
     <div class="hero-sub">Grade semanal separada por cidade</div>
   </div>
   <div class="wrap">
-    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1.25rem;align-items:flex-end">
-      <div style="min-width:200px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Semana</label>
-        <select id="cidadeF-semana" onchange="renderCidades()" style="width:100%;padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
-          <option value="all">Todas as semanas</option>
-        </select>
+    <div style="background:var(--surf);border:.5px solid var(--bdr2);border-radius:var(--rl);padding:1.25rem;margin-bottom:1.25rem">
+      <div style="font-size:13px;font-weight:600;margin-bottom:.9rem;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-filter" style="color:var(--primary);font-size:15px" aria-hidden="true"></i>
+        Filtrar por cidade
       </div>
-      <div style="flex:1;min-width:200px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Buscar cidade</label>
-        <div style="display:flex;align-items:center;gap:6px;background:var(--surf2);border:.5px solid var(--bdr2);border-radius:var(--r);padding:7px 10px">
-          <i class="ti ti-search" style="font-size:13px;color:var(--txf);flex-shrink:0" aria-hidden="true"></i>
-          <input id="cidadeF-search" type="text" placeholder="Buscar cidade..." oninput="renderCidades()" style="border:none;background:none;font-size:13px;font-family:'Inter',sans-serif;color:var(--tx);outline:none;width:100%">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1rem">
+        <div style="flex:2;min-width:200px">
+          <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Buscar cidade</label>
+          <div style="display:flex;align-items:center;gap:6px;background:var(--surf2);border:.5px solid var(--bdr2);border-radius:var(--r);padding:8px 12px">
+            <i class="ti ti-search" style="font-size:14px;color:var(--txf);flex-shrink:0" aria-hidden="true"></i>
+            <input id="cidadeF-search" type="text" placeholder="Nome da cidade..." onkeydown="if(event.key==='Enter')renderCidades()" style="border:none;background:none;font-size:13px;font-family:'Inter',sans-serif;color:var(--tx);outline:none;width:100%">
+          </div>
+        </div>
+        <div style="min-width:180px">
+          <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Semana</label>
+          <select id="cidadeF-semana" style="width:100%;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
+            <option value="all">Todas as semanas</option>
+          </select>
+        </div>
+        <div style="min-width:160px">
+          <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Modalidade</label>
+          <select id="cidadeF-modal" style="width:100%;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
+            <option value="all">Todas</option>
+          </select>
+        </div>
+        <div style="min-width:160px">
+          <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Ordenar</label>
+          <select id="cidadeF-ordem" style="width:100%;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
+            <option value="nome">Nome A–Z</option>
+            <option value="aulas_desc">Mais aulas</option>
+            <option value="aulas_asc">Menos aulas</option>
+          </select>
         </div>
       </div>
-      <div style="min-width:160px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Modalidade</label>
-        <select id="cidadeF-modal" onchange="renderCidades()" style="width:100%;padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
-          <option value="all">Todas</option>
-        </select>
-      </div>
-      <div style="min-width:160px">
-        <label style="display:block;font-size:11px;font-weight:500;color:var(--txm);margin-bottom:4px">Ordenar cidades</label>
-        <select id="cidadeF-ordem" onchange="renderCidades()" style="width:100%;padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;border:.5px solid var(--bdr2);border-radius:var(--r);background:var(--surf2);color:var(--tx);outline:none;cursor:pointer">
-          <option value="nome">Nome A–Z</option>
-          <option value="aulas_desc">Mais aulas</option>
-          <option value="aulas_asc">Menos aulas</option>
-        </select>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="renderCidades()" style="display:flex;align-items:center;gap:6px;padding:9px 20px;background:var(--primary);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;font-weight:500;cursor:pointer">
+          <i class="ti ti-search" style="font-size:14px" aria-hidden="true"></i>Buscar
+        </button>
+        <button onclick="clearCidadeFilters()" style="display:flex;align-items:center;gap:6px;padding:9px 16px;background:var(--surf2);color:var(--txm);border:.5px solid var(--bdr2);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;font-weight:500;cursor:pointer">
+          <i class="ti ti-x" style="font-size:13px" aria-hidden="true"></i>Limpar
+        </button>
+        <span id="cidadeResultCount" style="font-size:12px;color:var(--txf)"></span>
       </div>
     </div>
-    <div id="cidadesGrid"></div>
+    <div id="cidadesGrid">
+      <div style="text-align:center;padding:3rem 1rem;color:var(--txf)">
+        <i class="ti ti-building-community" style="font-size:40px;display:block;margin-bottom:.75rem;opacity:.3" aria-hidden="true"></i>
+        <div style="font-size:14px;font-weight:500;margin-bottom:.35rem">Use os filtros acima para buscar</div>
+        <div style="font-size:12px">Digite o nome de uma cidade ou selecione uma semana</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1733,10 +1754,25 @@ function renderCidades(){
   const semana = gv('cidadeF-semana');
   const modal  = gv('cidadeF-modal');
   const ordem  = gv('cidadeF-ordem');
+  const grid   = document.getElementById('cidadesGrid');
+  const countEl= document.getElementById('cidadeResultCount');
+  if(!grid) return;
+
+  // Show placeholder if no filter active
+  const hasFilter = q || semana!=='all' || modal!=='all';
+  if(!hasFilter){
+    grid.innerHTML=`<div style="text-align:center;padding:3rem 1rem;color:var(--txf)">
+      <i class="ti ti-building-community" style="font-size:40px;display:block;margin-bottom:.75rem;opacity:.3" aria-hidden="true"></i>
+      <div style="font-size:14px;font-weight:500;margin-bottom:.35rem">Use os filtros acima para buscar</div>
+      <div style="font-size:12px">Digite o nome de uma cidade ou selecione uma semana</div>
+    </div>`;
+    if(countEl) countEl.textContent='';
+    return;
+  }
 
   const CAT_COLOR={yoga:'#1D9E75',musculacao:'#378ADD',crossfit:'#D85A30',danca:'#D4537E',meditacao:'#7F77DD',pilates:'#BA7517',hiit:'#E24B4A',volei:'#00897B',surf:'#0277BD',funcional:'#F4511E',corrida:'#8D6E63',boxe:'#C62828',muaythai:'#AD1457',capoeira:'#6A1B9A',gap:'#00838F',outros:'#78909C'};
   const _isDark=document.documentElement.getAttribute('data-theme')==='dark';
-  const CAT_BG  =_isDark
+  const CAT_BG=_isDark
     ?{yoga:'#0d2e22',musculacao:'#0d1e35',crossfit:'#2e1408',danca:'#2e0d1a',meditacao:'#1a1830',pilates:'#2a1c06',hiit:'#2e0d0d',volei:'#0d2420',surf:'#0d1e2e',funcional:'#2e1a10',corrida:'#1e1510',boxe:'#2e0808',muaythai:'#2e0818',capoeira:'#1e0d2e',gap:'#0d2224',outros:'#1a1e22'}
     :{yoga:'#e1f5ee',musculacao:'#e6f1fb',crossfit:'#faece7',danca:'#fbeaf0',meditacao:'#eeedfe',pilates:'#faeeda',hiit:'#fcebeb',volei:'#e0f2f1',surf:'#e1f0f8',funcional:'#fbe9e7',corrida:'#efebe9',boxe:'#ffebee',muaythai:'#fce4ec',capoeira:'#f3e5f5',gap:'#e0f7fa',outros:'#eceff1'};
 
@@ -1746,44 +1782,43 @@ function renderCidades(){
     (modal==='all'||c.name===modal)
   );
 
-  const byCidade = {};
+  const byCidade={};
   filtered.forEach(c=>{
     if(!byCidade[c.cidade]) byCidade[c.cidade]={name:c.cidade,aulas:[]};
     byCidade[c.cidade].aulas.push(c);
   });
 
-  let cidadeList = Object.values(byCidade).filter(c=> !q || norm(c.name).includes(q));
+  let cidadeList=Object.values(byCidade).filter(c=>!q||norm(c.name).includes(q));
   if(ordem==='aulas_desc') cidadeList.sort((a,b)=>b.aulas.length-a.aulas.length);
   else if(ordem==='aulas_asc') cidadeList.sort((a,b)=>a.aulas.length-b.aulas.length);
   else cidadeList.sort((a,b)=>a.name.localeCompare(b.name));
 
-  const grid = document.getElementById('cidadesGrid');
-  if(!grid) return;
-  if(!cidadeList.length){ grid.innerHTML='<div style="text-align:center;padding:2rem;color:var(--txf)">Nenhuma cidade encontrada.</div>'; return; }
+  if(countEl) countEl.textContent=cidadeList.length+' cidade'+(cidadeList.length!==1?'s':'')+' encontrada'+(cidadeList.length!==1?'s':'');
 
-  // For each city: mini timetable (days x modalities summary)
-  grid.innerHTML = cidadeList.map(({name, aulas})=>{
-    const DAYS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-    const byDay = {};
+  if(!cidadeList.length){
+    grid.innerHTML='<div style="text-align:center;padding:2rem;color:var(--txf)">Nenhuma cidade encontrada.</div>';
+    return;
+  }
+
+  const DAYS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  grid.innerHTML=cidadeList.map(({name,aulas})=>{
+    const byDay={};
     aulas.forEach(c=>{ if(!byDay[c.day]) byDay[c.day]=[]; byDay[c.day].push(c); });
-    const daysPresent = [...new Set(aulas.map(c=>c.day))].sort();
-
-    const pills = daysPresent.map(d=>{
-      const dc = byDay[d].sort((a,b)=>a.time.localeCompare(b.time));
-      const mods = [...new Set(dc.map(c=>c.name))];
-      return `<div style="background:var(--surf2);border-radius:var(--r);padding:.6rem .8rem;min-width:110px">
+    const daysPresent=[...new Set(aulas.map(c=>c.day))].sort();
+    const sponsors=[...new Set(aulas.map(c=>c.brand).filter(Boolean))].slice(0,4);
+    const pills=daysPresent.map(d=>{
+      const dc=byDay[d].sort((a,b)=>a.time.localeCompare(b.time));
+      const textCol=_isDark?'rgba(255,255,255,.85)':'inherit';
+      return `<div style="background:var(--surf2);border-radius:var(--r);padding:.6rem .8rem;min-width:120px;flex-shrink:0">
         <div style="font-size:11px;font-weight:600;color:var(--txm);margin-bottom:4px">${DAYS[d]}</div>
-        ${dc.slice(0,4).map(c=>{
-          const bg=CAT_BG[c.cat]||'#f5f4f0'; const col=CAT_COLOR[c.cat]||'#555';
-          const textCol = isDark ? (col.replace('#','').match(/[0-9a-f]{6}/i) ? '#fff' : col) : col;
-          return `<div style="background:${bg};border-radius:5px;padding:3px 6px;margin-bottom:3px;font-size:10px;font-weight:500;color:${textCol}">${c.time} · ${c.name}</div>`;
+        ${dc.slice(0,5).map(c=>{
+          const bg=CAT_BG[c.cat]||'#f5f4f0';
+          const col=CAT_COLOR[c.cat]||'#555';
+          return `<div style="background:${bg};border-radius:5px;padding:3px 7px;margin-bottom:3px;font-size:10px;font-weight:500;color:${col}">${c.time} · ${c.name}</div>`;
         }).join('')}
-        ${dc.length>4?`<div style="font-size:10px;color:var(--txf)">+${dc.length-4} mais</div>`:''}
+        ${dc.length>5?`<div style="font-size:10px;color:var(--txf);margin-top:2px">+${dc.length-5} mais</div>`:''}
       </div>`;
     }).join('');
-
-    const sponsors = [...new Set(aulas.map(c=>c.brand).filter(Boolean))].slice(0,4);
-
     return `<div style="background:var(--surf);border:.5px solid var(--bdr);border-radius:var(--rl);overflow:hidden;margin-bottom:1.25rem">
       <div style="padding:.85rem 1rem;border-bottom:.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
         <div style="display:flex;align-items:center;gap:8px">
@@ -1791,26 +1826,21 @@ function renderCidades(){
           <span style="font-size:15px;font-weight:600">${name}</span>
           <span style="font-size:11px;color:var(--txm);background:var(--surf2);padding:2px 8px;border-radius:10px">${aulas.length} aulas</span>
         </div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap">
-          ${sponsors.map(s=>`<span style="font-size:10px;background:var(--surf3);color:var(--txm);padding:2px 7px;border-radius:4px">${s}</span>`).join('')}
-        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">${sponsors.map(s=>`<span style="font-size:10px;background:var(--surf3);color:var(--txm);padding:2px 7px;border-radius:4px">${s}</span>`).join('')}</div>
       </div>
-      <div style="padding:.75rem;display:flex;gap:8px;overflow-x:auto;flex-wrap:wrap">${pills}</div>
+      <div style="padding:.75rem;display:flex;gap:8px;overflow-x:auto">${pills}</div>
     </div>`;
   }).join('');
 }
 
-
-async function initApp(){
-  initTheme();
-  setTodayLabel();
-  setSyncStatus('syncing');
-  await fetchAndApplySheet();
-  // Note: if fetch failed, classes stays empty and error banner shows
-  // No silent fallback to stale data
-  startAutoRefresh();
+function clearCidadeFilters(){
+  const el=document.getElementById('cidadeF-search');
+  if(el) el.value='';
+  ['cidadeF-semana','cidadeF-modal'].forEach(id=>{
+    const e=document.getElementById(id);
+    if(e) e.value='all';
+  });
+  renderCidades();
 }
-checkSession();
-</script>
-</body>
-</html>
+
+>
