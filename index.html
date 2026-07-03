@@ -1437,7 +1437,7 @@ function renderGrid(){
       const isTod = dt.toDateString()===today.toDateString();
       const dd = dt.getDate();
       const mm = dt.getMonth()+1; // no leading zero
-      return `<th style="min-width:200px;padding:10px 12px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;border-bottom:.5px solid var(--bdr);border-left:.5px solid var(--bdr);background:${isTod?'var(--primary)':'var(--surf)'};color:${isTod?'#fff':'var(--txm)'}">
+      return `<th data-today="${isTod?'1':'0'}" style="min-width:200px;padding:10px 12px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;border-bottom:.5px solid var(--bdr);border-left:.5px solid var(--bdr);background:${isTod?'var(--primary)':'var(--surf)'};color:${isTod?'#fff':'var(--txm)'}">
         <div>${DNAMES[d]}</div>
         <div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:${isTod?'#fff':'var(--tx)'}">${dd}/${mm}</div>
         ${isTod?'<div style="font-size:9px;opacity:.75;margin-top:2px">hoje</div>':''}
@@ -1520,6 +1520,20 @@ function renderGrid(){
 
   makeSection('MANHÃ', manha);
   makeSection('TARDE', tarde);
+
+  // Auto-scroll so today's column is centered in the visible area
+  setTimeout(()=>{
+    const wrap = document.getElementById('timetableWrap');
+    const todayTh = document.querySelector('#timetableHead th[data-today="1"]');
+    if(wrap && todayTh){
+      const wrapRect = wrap.getBoundingClientRect();
+      const thRect = todayTh.getBoundingClientRect();
+      const currentScroll = wrap.scrollLeft;
+      const thCenter = (thRect.left - wrapRect.left) + currentScroll + thRect.width/2;
+      const targetScroll = thCenter - wrap.clientWidth/2;
+      wrap.scrollTo({left: Math.max(0, targetScroll), behavior:'smooth'});
+    }
+  }, 50);
 }
 
 
