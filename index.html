@@ -969,8 +969,13 @@ let spWeekFilter='all',spTypeFilter='all';
 // ── GOOGLE SHEETS API CONFIG ─────────────────────────────────────────────────
 const SHEET_API_KEY  = 'AIzaSyDk9CTsIFpnEM92R5D4EIhFqJx4Txy7bL4';
 const SHEET_ID       = '1kuvOMZcbocUGcy8aEzkAxqqiOLYmPD3SKAY2mSlrLEg';
-const SHEET_TAB      = 'Resultado da consulta';
-const SHEET_API_URL  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(SHEET_TAB)}?key=${SHEET_API_KEY}&valueRenderOption=FORMATTED_VALUE`;
+const SHEET_TAB       = 'Resultado da consulta';
+// Lista de abas a serem buscadas e mescladas. Adicione o nome da nova aba de Agosto aqui.
+const SHEET_TABS       = ['Resultado da consulta'];
+function sheetApiUrlFor(tabName){
+  return `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(tabName)}?key=${SHEET_API_KEY}&valueRenderOption=FORMATTED_VALUE`;
+}
+const SHEET_API_URL  = sheetApiUrlFor(SHEET_TAB);
 const SHEET_CSV_URL  = ''; // não usado — mantido para compatibilidade
 const SHEET_REFRESH_INTERVAL = 5 * 60 * 1000; // auto-refresh a cada 5 min
 
@@ -1155,39 +1160,52 @@ function setSyncStatus(s){
 }
 
 async function fetchAndApplySheet(){
-  if(!SHEET_API_KEY||!SHEET_ID||!SHEET_TAB) return false;
+  const tabs = (SHEET_TABS && SHEET_TABS.length) ? SHEET_TABS : [SHEET_TAB];
+  if(!SHEET_API_KEY||!SHEET_ID||!tabs.length) return false;
   setSyncStatus('syncing');
   try{
-    const url = SHEET_API_URL + '&t=' + Date.now();
-    const res = await fetch(url);
+    const results = await Promise.all(tabs.map(async(tabName)=>{
+      const url = sheetApiUrlFor(tabName) + '&t=' + Date.now();
+      const res = await fetch(url);
+      if(!res.ok){
+        const err = await res.json().catch(()=>({}));
+        const msg = (err.error&&err.error.message)||('HTTP '+res.status);
+        const status = res.status;
+        if(status===403) throw new Error('Acesso negado (403) na aba "'+tabName+'" — abra a planilha, clique em Compartilhar e mude o acesso para "Qualquer pessoa com o link → Leitor"');
+        if(status===404) throw new Error('Planilha não encontrada (404) — verifique o ID da planilha');
+        if(status===400) throw new Error('Nome de aba inválido (400) — verifique se a aba se chama "'+tabName+'"');
+        throw new Error(msg);
+      }
+      const data = await res.json();
+      if(!data.values||data.values.length<2) return []; // aba vazia, ignora silenciosamente
+      const headers = data.values[0].map(h=>shNorm(h).replace(/[^a-z0-9]/g,'_'));
+      return data.values.slice(1).map((row,i)=>{
+        const obj={};
+        headers.forEach((h,j)=>obj[h]=row[j]||'');
+        return shRowToClass(obj, tabName+'-'+i);
+      });
+    }));
 
-    // Parse error details from Google API
-    if(!res.ok){
-      const err = await res.json().catch(()=>({}));
-      const msg = (err.error&&err.error.message)||('HTTP '+res.status);
-      const status = res.status;
-      if(status===403) throw new Error('Acesso negado (403) — abra a planilha, clique em Compartilhar e mude o acesso para "Qualquer pessoa com o link → Leitor"');
-      if(status===404) throw new Error('Planilha não encontrada (404) — verifique o ID da planilha');
-      if(status===400) throw new Error('Nome de aba inválido (400) — verifique se a aba se chama "'+SHEET_TAB+'"');
-      throw new Error(msg);
-    }
-
-    const data = await res.json();
-    if(!data.values||data.values.length<2) throw new Error('Planilha vazia ou sem dados na aba "'+SHEET_TAB+'"');
-
-    const headers = data.values[0].map(h=>shNorm(h).replace(/[^a-z0-9]/g,'_'));
-    const raw = data.values.slice(1).map((row,i)=>{
-      const obj={};
-      headers.forEach((h,j)=>obj[h]=row[j]||'');
-      return shRowToClass(obj,i);
-    });
-
+    const raw = results.flat();
     const valid = raw.filter(c=>c.local||c.name);
     if(!valid.length) throw new Error('Nenhuma aula válida encontrada — verifique as colunas da planilha');
 
     const {rows, meta} = assignWeeks(valid);
     classes = rows;
     WEEKS_META.length=0; meta.forEach(m=>WEEKS_META.push(m));
+
+    // Seleciona automaticamente a semana que contém a data de hoje
+    const today = new Date(); today.setHours(0,0,0,0);
+    let autoWeek = 0;
+    for(let i=0;i<WEEKS_META.length;i++){
+      const s = WEEKS_META[i].start;
+      const wStart = new Date(s[0], s[1], s[2]);
+      const wEnd = new Date(wStart); wEnd.setDate(wEnd.getDate()+6);
+      if(today >= wStart && today <= wEnd){ autoWeek = i; break; }
+      if(today >= wStart) autoWeek = i; // fallback: semana mais recente já iniciada
+    }
+    curWeek = autoWeek;
+
     buildWeekTabs();
     buildLocalWeekTabs();
     buildCidadeDropdown();
@@ -1204,13 +1222,13 @@ async function fetchAndApplySheet(){
         const primeiro=meta[0]?meta[0].range:'';
         const ultimo=meta[meta.length-1]?meta[meta.length-1].range:'';
         const periodo=primeiro===ultimo?primeiro:primeiro+' – '+ultimo.split('–')[1];
-        if(titleEl) titleEl.textContent='Julho 2026';
+        if(titleEl) titleEl.textContent='Julho–Agosto 2026';
         if(eyeEl) eyeEl.textContent='Grade de aulas · Mude Brasil';
         if(subEl) subEl.textContent=classes.length.toLocaleString('pt-BR')+' aulas · '+cidades.slice(0,4).join(', ')+(cidades.length>4?' e mais '+( cidades.length-4)+' cidades':'');
       }catch(ex){ console.warn('hero update:',ex.message); }
       showToast('✓ '+classes.length.toLocaleString('pt-BR')+' aulas sincronizadas');
     },200);
-    console.log('Sheets API: '+classes.length+' aulas, '+meta.length+' semanas');
+    console.log('Sheets API: '+classes.length+' aulas, '+meta.length+' semanas, semana atual='+curWeek);
     return true;
   }catch(e){
     console.error('Sheets API erro:', e.message);
