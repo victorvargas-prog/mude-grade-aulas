@@ -971,7 +971,7 @@ const SHEET_API_KEY  = 'AIzaSyDk9CTsIFpnEM92R5D4EIhFqJx4Txy7bL4';
 const SHEET_ID       = '1kuvOMZcbocUGcy8aEzkAxqqiOLYmPD3SKAY2mSlrLEg';
 const SHEET_TAB       = 'Resultado da consulta';
 // Lista de abas a serem buscadas e mescladas. Adicione o nome da nova aba de Agosto aqui.
-const SHEET_TABS       = ['Resultado da consulta'];
+const SHEET_TABS       = ['Resultado da consulta', 'Agosto 2026'];
 function sheetApiUrlFor(tabName){
   return `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(tabName)}?key=${SHEET_API_KEY}&valueRenderOption=FORMATTED_VALUE`;
 }
