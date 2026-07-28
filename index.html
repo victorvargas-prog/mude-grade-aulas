@@ -1261,8 +1261,9 @@ async function fetchAndApplySheet(){
       }catch(ex){ console.warn('hero update:',ex.message); }
       if(missing.length || failedTabs.length){
         const warnParts = [...missing.map(m=>'aba "'+m+'" não encontrada'), ...failedTabs];
+        const abasDisponiveis = actualTitles ? ' Abas na planilha: '+actualTitles.join(', ')+'.' : '';
         document.querySelectorAll('#sheetsError').forEach(el=>{
-          el.textContent='⚠ Sincronizado parcialmente: '+classes.length.toLocaleString('pt-BR')+' aulas carregadas. '+warnParts.join(' · ');
+          el.textContent='⚠ Sincronizado parcialmente: '+classes.length.toLocaleString('pt-BR')+' aulas carregadas. '+warnParts.join(' · ')+'.'+abasDisponiveis;
           el.style.display='block';
         });
       } else {
