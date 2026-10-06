@@ -437,8 +437,8 @@ tr:hover td{background:var(--surf2)}
 <!-- GRADE PAGE -->
 <div class="page active" id="page-grade">
   <div class="hero">
-    <div class="hero-eye" id="heroEye">Grade de aulas · Mude Brasil</div>
-    <div class="hero-title" id="heroTitle">Carregando...</div>
+    <div class="hero-eye" id="heroEye">Grade de aulas · Mude</div>
+    <div class="hero-title" id="heroTitle">Grade de Aulas</div>
     <div class="hero-sub" id="heroSub">Modalidade, horário, local e patrocinador por dia da semana</div>
     <div class="hero-kpis">
       <div class="kpi"><div class="kpi-v" id="kpi-total">—</div><div class="kpi-l">Total de aulas</div></div>
@@ -1255,16 +1255,8 @@ async function fetchAndApplySheet(){
       const eyeEl=document.getElementById('heroEye');
       try{
         const cidades=[...new Set(classes.map(r=>r.cidade).filter(Boolean))];
-        if(titleEl){
-          const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-          const first=WEEKS_META[0]&&WEEKS_META[0].start, last=WEEKS_META[WEEKS_META.length-1]&&WEEKS_META[WEEKS_META.length-1].start;
-          if(first&&last){
-            const lastEnd=new Date(last[0],last[1],last[2]+6);
-            const m1=first[1], m2=lastEnd.getMonth(), y=lastEnd.getFullYear();
-            titleEl.textContent=(m1===m2?MESES[m1]:MESES[m1]+'–'+MESES[m2])+' '+y;
-          }
-        }
-        if(eyeEl) eyeEl.textContent='Grade de aulas · Mude Brasil';
+        if(titleEl) titleEl.textContent='Grade de Aulas';
+        if(eyeEl) eyeEl.textContent='Grade de aulas · Mude';
         if(subEl) subEl.textContent=classes.length.toLocaleString('pt-BR')+' aulas · '+cidades.slice(0,4).join(', ')+(cidades.length>4?' e mais '+( cidades.length-4)+' cidades':'');
       }catch(ex){ console.warn('hero update:',ex.message); }
       if(missing.length || failedTabs.length){
