@@ -969,9 +969,9 @@ let spWeekFilter='all',spTypeFilter='all';
 // ── GOOGLE SHEETS API CONFIG ─────────────────────────────────────────────────
 const SHEET_API_KEY  = 'AIzaSyDk9CTsIFpnEM92R5D4EIhFqJx4Txy7bL4';
 const SHEET_ID       = '1kuvOMZcbocUGcy8aEzkAxqqiOLYmPD3SKAY2mSlrLEg';
-const SHEET_TAB       = 'Resultado da consulta';
+const SHEET_TAB       = 'Julho 2026';
 // Lista de abas a serem buscadas e mescladas. Adicione o nome da nova aba de Agosto aqui.
-const SHEET_TABS       = ['Resultado da consulta', 'Agosto 2026'];
+const SHEET_TABS       = ['Julho 2026', 'Agosto 2026', 'Setembro 2026', 'Outubro 2026'];
 function sheetApiUrlFor(tabName){
   return `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(tabName)}?key=${SHEET_API_KEY}&valueRenderOption=FORMATTED_VALUE`;
 }
@@ -1255,7 +1255,15 @@ async function fetchAndApplySheet(){
       const eyeEl=document.getElementById('heroEye');
       try{
         const cidades=[...new Set(classes.map(r=>r.cidade).filter(Boolean))];
-        if(titleEl) titleEl.textContent='Julho–Agosto 2026';
+        if(titleEl){
+          const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+          const first=WEEKS_META[0]&&WEEKS_META[0].start, last=WEEKS_META[WEEKS_META.length-1]&&WEEKS_META[WEEKS_META.length-1].start;
+          if(first&&last){
+            const lastEnd=new Date(last[0],last[1],last[2]+6);
+            const m1=first[1], m2=lastEnd.getMonth(), y=lastEnd.getFullYear();
+            titleEl.textContent=(m1===m2?MESES[m1]:MESES[m1]+'–'+MESES[m2])+' '+y;
+          }
+        }
         if(eyeEl) eyeEl.textContent='Grade de aulas · Mude Brasil';
         if(subEl) subEl.textContent=classes.length.toLocaleString('pt-BR')+' aulas · '+cidades.slice(0,4).join(', ')+(cidades.length>4?' e mais '+( cidades.length-4)+' cidades':'');
       }catch(ex){ console.warn('hero update:',ex.message); }
